@@ -1,0 +1,13 @@
+#ignores
+__pycache__/
+.git/
+.idea/
+/.directory
+/..gitinore.kate.swp
+/Notes.txt
+/test.py
+/test1.py
+/test2.py
+/test3.py
+/gitscript.sh
+.fuse_hidden*
