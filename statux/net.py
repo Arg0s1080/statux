@@ -122,3 +122,4 @@ def down_up_speed(interface: str, interval=0.0, scale="bytes", precision=2):
     stat = _set_delta(interface, interval)
     return set_bytes(stat[0], stat[1], scale_in="bytes", scale_out=scale, precision=precision)
 
+
