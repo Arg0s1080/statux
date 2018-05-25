@@ -1,4 +1,4 @@
-# pystats
+# Statux
 Some useful Linux data
 
 ## CPU
