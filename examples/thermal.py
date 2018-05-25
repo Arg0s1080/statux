@@ -1,3 +1,12 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# GNU General Public License v3.0
+# http://www.gnu.org/licenses
+#
+# (ɔ) Iván Rincón 2018
+
+
 from statux.thermald import *
 
 print("Package Temp: %.2fC°" % x86_pkg_temp())

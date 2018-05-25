@@ -1,3 +1,19 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# GNU General Public License v3.0
+#
+# Permissions of this strong copyleft license are conditioned on making available
+# complete source code of licensed works and modifications, which include larger works
+# using a licensed work, under the same license. Copyright and license notices must be
+# preserved. Contributors provide an express grant of patent rights.
+#
+# For more information on this, and how to apply and follow theGNU GPL, see:
+# http://www.gnu.org/licenses
+#
+# (ɔ) Iván Rincón 2018
+
+
 from statux._conversions import set_bytes
 
 
@@ -121,5 +137,4 @@ def down_up_speed(interface: str, interval=0.0, scale="bytes", precision=2):
 
     stat = _set_delta(interface, interval)
     return set_bytes(stat[0], stat[1], scale_in="bytes", scale_out=scale, precision=precision)
-
 
