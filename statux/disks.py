@@ -180,19 +180,3 @@ def bytes_read_write_multi(*partitions: str, interval=0.0, persecond=False, scal
         dic[key] = set_bytes(value[0], value[1], scale_in="bytes", scale_out=scale, precision=precision)
     return dic
 
-"""
-print(set_bytes(65000, scale_in="kib", scale_out="auto"))
-# TEST:
-from time import sleep
-count = 0
-while count < 50:
-    #print("SDA:", bytes_read_write("sda", interval=1, persecond=False, scale="kib"))
-    print("SDA, SDA7:", bytes_read_write_multi("sda", "sda8", "sda7", interval=0, persecond=False, scale="auto"))
-
-    #print("SDA7:", bytes_read_write("sda7", 1, False, "kib"))
-    #print("SDA8:", bytes_read_write("sda8", 0, False, "kib"))
-    #print("SDA9", bytes_read_write("sda8", 1, False, scale="auto"))
-
-    sleep(1)
-    count += 1
-    #print(_get_stat("sda7"))"""
