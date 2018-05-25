@@ -14,7 +14,7 @@
 # (ɔ) Iván Rincón 2018
 
 
-def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2) -> object:
+def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
     # Function returns a int if scale_out == 'bytes', a string if scale_out == 'auto', a float otherwise
     f = []
     auto = True if scale_out == "auto" else False
