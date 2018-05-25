@@ -133,6 +133,7 @@ def cpu_max_frequency(per_core=True, scale="mhz", precision=3):
             if file == "cpuinfo_max_freq":
                 with open(join(_FREQUENCY_POLICY, policy, file), "rb") as stat:
                     r.insert(int(policy[-1]), int(stat.readline()) / 1000)
+                break
     if _MAX_FREQUENCY is None:
         _MAX_FREQUENCY = r
     r = list(map(lambda x: round(set_mhz(x, scale), precision), r))
