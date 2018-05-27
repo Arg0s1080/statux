@@ -32,41 +32,41 @@ def _get_val(*items) -> list:
         return values
 
 
-def get_mem_total(scale="MiB", precision=2):
+def total(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemTotal")[0], scale_out=scale, precision=precision)
 
 
-def get_mem_free(scale="MiB", precision=2):
+def free(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemFree")[0], scale_out=scale, precision=precision)
 
 
-def get_mem_free_percent(precision=2) -> float:
+def free_percent(precision=2) -> float:
     values = _get_val(b"MemFree", b"MemTotal")
     return round(values[0] / values[1] * 100, precision)
 
 
-def get_mem_available(scale="MiB", precision=2):
+def available(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemAvailable")[0], scale_out=scale, precision=precision)
 
 
-def get_mem_available_percent(precision=2) -> float:
+def available_percent(precision=2) -> float:
     values = _get_val(b"MemAvailable", b"MemTotal")
     return round(values[0] / values[1] * 100, precision)
 
 
-def get_mem_buff_cache(scale="MiB", precision=2):
+def buff_cache(scale="MiB", precision=2):
     items = (b"Buffers", b"Cached", b"SReclaimable", b"SUnreclaim")
     buff, cache, sre, sur = map(float, _get_val(*items))
     return set_bytes(buff + cache + sre + sur, scale_out=scale, precision=precision)
 
 
-def get_mem_used(scale="MiB", precision=2):
+def used(scale="MiB", precision=2):
     items = (b"MemTotal", b"MemFree", b"Buffers", b"Cached", b"Slab")
-    tot, free, buff, cache, slab = map(float, _get_val(*items))
-    return set_bytes(tot - (buff + cache + slab + free), scale_out=scale, precision=precision)
+    tot, free_, buff, cache, slab = map(float, _get_val(*items))
+    return set_bytes(tot - (buff + cache + slab + free_), scale_out=scale, precision=precision)
 
 
-def get_mem_used_percent(precision=2):
+def used_percent(precision=2):
     items = (b"MemTotal", b"MemFree", b"Buffers", b"Cached", b"Slab")
     tot, free, buff, cache, slab = map(float, _get_val(*items))
     return round((tot - buff - cache - slab - free) / tot * 100, precision)
