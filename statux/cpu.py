@@ -53,7 +53,7 @@ def physical_cpus():
         return sum(res.values())
 
 
-def cpu_load(interval=0.0, per_core=False, precision=2):
+def load(interval=0.0, per_core=False, precision=2):
     """ Returns CPU load percentage
 
     Params:
@@ -97,7 +97,7 @@ def cpu_load(interval=0.0, per_core=False, precision=2):
     return res if len(res) > 1 else res[0]
 
 
-def cpu_frequency(per_core=True, scale="mhz", precision=3):
+def frequency(per_core=True, scale="mhz", precision=3):
     """Returns current cpu frequency
 
     Params:
@@ -115,7 +115,7 @@ def cpu_frequency(per_core=True, scale="mhz", precision=3):
         return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-def cpu_max_frequency(per_core=True, scale="mhz", precision=3):
+def max_frequency(per_core=True, scale="mhz", precision=3):
     """Returns cpu max frequency
 
         Params:
@@ -140,7 +140,7 @@ def cpu_max_frequency(per_core=True, scale="mhz", precision=3):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-def cpu_frequency_percent(per_core=True, precision=2):
+def frequency_percent(per_core=True, precision=2):
     """Returns current cpu frequency percent
 
             Params:
@@ -151,8 +151,8 @@ def cpu_frequency_percent(per_core=True, precision=2):
 
     """
     global _MAX_FREQUENCY
-    mxm = cpu_max_frequency() if _MAX_FREQUENCY is None else _MAX_FREQUENCY
-    r = [round(c / m * 100, precision) for c, m in zip(cpu_frequency(), mxm)]
+    mxm = max_frequency() if _MAX_FREQUENCY is None else _MAX_FREQUENCY
+    r = [round(c / m * 100, precision) for c, m in zip(frequency(), mxm)]
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 

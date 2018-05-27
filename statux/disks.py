@@ -76,6 +76,7 @@ def _get_disks_stats():
             res[str(partition)] = int(ln[5]) * bsize, int(ln[9]) * bsize
     return res
 
+
 def total_size(partition: str, scale="GiB", precision=2):
     """Returns total size of a partition
 
