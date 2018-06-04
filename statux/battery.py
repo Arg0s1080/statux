@@ -21,6 +21,7 @@ _PARENT = "/sys/class/power_supply/"
 _STAT = "uevent"
 _ACAD = "%sACAD/" % _PARENT
 _UPOWER = "/etc/UPower/UPower.conf"
+_LID = "/proc/acpi/button/lid/"
 
 
 def _noner(fun):
@@ -34,15 +35,21 @@ def _noner(fun):
     return wrapper
 
 
-def _get_stat():
+def _get_stat(stat_: str) -> list:
     bat = None
-    for path in listdir(_PARENT):
-        if path.startswith("BAT"):
-            bat = path
-            break
-    if bat is not None:
-        with open(join(_PARENT, bat, _STAT), "r") as f:
-            file = f.readlines()
+    if exists(_PARENT):
+        for folder in listdir(_PARENT):
+            if folder.startswith("BAT"):
+                bat = folder
+                break
+        if bat is not None:
+            with open(join(_PARENT, bat, stat_), "r") as f:
+                return f.readlines()
+
+
+def _get_uevent():
+        file = _get_stat(_STAT)
+        if file is not None:
             res = {}
             for ln in file:
                 ln = ln.replace("POWER_SUPPLY_", "").split("=")
@@ -83,7 +90,7 @@ def _get_upower():
         return res
 
 
-stat = _get_stat()
+stat = _get_uevent()
 
 
 @_noner
@@ -196,3 +203,22 @@ def wear_level() -> float:
 def technology() -> str:
     """Returns chemistry of the battery"""
     return stat["technology"]
+
+
+@_noner
+def supply_type():
+    return _get_stat("type")[0]
+
+
+@_noner
+def lid_state():
+    lid = None
+    for folder in listdir(_LID):
+        if folder.startswith("LID"):
+            lid = folder
+    if lid is not None:
+        with open(join(_LID, lid, "state"), "r") as f:
+            return f.readline().split()[1]
+
+# YOU ARE HERE if not exists uvent, type, lid, etc (file and paths)
+print(supply_type())
