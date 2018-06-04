@@ -33,22 +33,25 @@ _last = None
 # /sys/block/sda/removable
 
 
+def partitions() -> list:
+    """Returns a list with partitions"""
+    with open(_PARTITIONS, "r") as f:
+        stat = f.readlines()
+        return [stat[i].split()[3] for i in range(2, len(stat)) if stat[i].split()[3][-1].isdigit()]
+
+
 def mounted_partitions() -> dict:
     """Returns a dict with mounted partitions and mount points"""
     def get_mounts():
         with open(_MOUNTS, "r") as file:
             return {line.split()[0]: line.split()[1] for line in file.readlines() if line.startswith("/")}
-
-    with open(_PARTITIONS, "r") as f:
-        stat = f.readlines()
-        res = {}
-        mounts = get_mounts()
-        for i in range(2, len(stat)):
-            ptt = stat[i].split()[3]
-            dev = "%s%s" % (_DEV, ptt)
-            if dev in mounts.keys():
-                res[ptt] = mounts[dev]
-        return res
+    res = {}
+    mounts = get_mounts()
+    for partition in partitions():
+        dev = "%s%s" % (_DEV, partition)
+        if dev in mounts.keys():
+            res[partition] = mounts[dev]
+    return res
 
 
 def _get_stat(partition):
