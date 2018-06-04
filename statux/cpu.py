@@ -13,7 +13,6 @@
 #
 # (ɔ) Iván Rincón 2018
 
-
 from time import sleep
 from os import listdir
 from os.path import join
@@ -53,7 +52,7 @@ def physical_cpus():
         return sum(res.values())
 
 
-def load(interval=0.0, per_core=False, precision=2):
+def load_percent(interval=0.0, per_core=False, precision=2):
     """ Returns CPU load percentage
 
     Params:
