@@ -35,7 +35,6 @@ def _noner(fun):
 
 
 def _get_stat():
-    # FIXME: _STAT_PATH can be BAT0, BAT1, BATx
     bat = None
     for path in listdir(_PARENT):
         if path.startswith("BAT"):
