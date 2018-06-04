@@ -64,7 +64,7 @@ def _get_stat_multi_physical_id():
     return res
 
 
-def x86_pkg_temp(scale="celsius", precision=2) -> float:
+def x86_pkg(scale="celsius", precision=2) -> float:
     """Returns CPU digital temperature package level sensor value
 
     More info: https://www.kernel.org/doc/Documentation/thermal/x86_pkg_temperature_thermal
@@ -80,7 +80,7 @@ def x86_pkg_temp(scale="celsius", precision=2) -> float:
                     return set_celsius(float(open(join(_PKG_INPUT, path, "temp")).readline()), scale, precision)
 
 
-def cores_temp(scale="celsius", precision=2) -> list:
+def cores(scale="celsius", precision=2) -> list:
     """Returns a sorted list with digital thermal sensors values for each core
 
     Params:
@@ -91,7 +91,7 @@ def cores_temp(scale="celsius", precision=2) -> list:
     return [set_celsius(stat[key], scale, precision) for key in sorted(stat) if key.startswith("Core")]
 
 
-def cpu_temp(scale="celsius", precision=2) -> float:
+def cpu(scale="celsius", precision=2) -> float:
     """Returns measured value on the surface of the integrated heat spreader, also called CPU temperature
 
     Params:
@@ -104,7 +104,7 @@ def cpu_temp(scale="celsius", precision=2) -> float:
             return set_celsius(stat[key], scale, precision)
 
 
-def cores_temp_multi(scale="celsius", precision=2) -> dict:
+def cores_multi(scale="celsius", precision=2) -> dict:
     """Returns a dict with digital thermal sensors values for each core. Each dict key is a physical id
 
     Params:
@@ -118,7 +118,7 @@ def cores_temp_multi(scale="celsius", precision=2) -> dict:
     return {key: [sc(stat[key][k]) for k in sorted(stat[key]) if k.startswith(b"Core")] for key in sorted(stat)}
 
 
-def cpu_temp_multi(scale="celsius", precision=2) -> dict:
+def cpu_multi(scale="celsius", precision=2) -> dict:
     """Returns a dict with measured values on each surface of the integrated heat spreaders
 
     Params:
