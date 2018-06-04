@@ -37,13 +37,13 @@ def _check_interface(interface: str, stat: dict):
     return interface
 
 
-def _get_bytes(interface: str, direction: bool):
-    # param direction:  Download: 0, Upload: 1
+def _get_bytes(interface: str, direction: int):
+    # param direction:  Download: 0, Upload: 1, Both: 2
     stat = _get_stat()
     _check_interface(interface, stat)
     for key, value in stat.items():
         if key == interface:
-            return value[direction]
+            return value[direction] if direction != 2 else value
 
 
 def _set_delta(interface: str, interval=0.0):
@@ -85,7 +85,7 @@ def download_bytes(interface: str, scale="bytes", precision=2):
         precision (int): Number of rounding decimals
 
     """
-    return set_bytes(_get_bytes(interface, False), scale_in="bytes", scale_out=scale, precision=precision)
+    return set_bytes(_get_bytes(interface, 0), scale_in="bytes", scale_out=scale, precision=precision)
 
 
 def upload_bytes(interface: str, scale="bytes", precision=2):
@@ -97,7 +97,20 @@ def upload_bytes(interface: str, scale="bytes", precision=2):
         precision (int): Number of rounding decimals
 
     """
-    return set_bytes(_get_bytes(interface, True), scale_in="bytes", scale_out=scale, precision=precision)
+    return set_bytes(_get_bytes(interface, 1), scale_in="bytes", scale_out=scale, precision=precision)
+
+
+def down_up_bytes(interface: str, scale="bytes", precision=2):
+    """Returns a tuple with bytes down-uploaded
+
+    Params:
+        interface (str): Interface name
+        scale     (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, MB, GB, TB or auto)
+        precision (int): Number of rounding decimals
+
+    """
+    bytes_ = _get_bytes(interface, 2)
+    return set_bytes(*bytes_, scale_in="bytes", scale_out=scale, precision=precision)
 
 
 def download_speed(interface: str, interval=0.0, scale="bytes", precision=2):
