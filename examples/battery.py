@@ -16,6 +16,7 @@ if is_present():
     for k, v in battery().items():
         print_txt(k, v)
 
+    print_txt("Supply type", supply_type())
     print_txt("Status", status())
     print_txt("Remaining Time", remaining_time())
     print_txt("Remaining Time", remaining_time(format=False), "seconds")
@@ -30,3 +31,7 @@ if is_present():
     print_txt("Low level", low_level())
     print_txt("Action level", action_level())
     print_txt("Power action", critical_power_action())
+
+lid = lid_state()
+if lid is not None:
+    print(" \nLid is %s" % lid)

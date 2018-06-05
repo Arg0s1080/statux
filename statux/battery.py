@@ -13,12 +13,13 @@
 #
 # (ɔ) Iván Rincón 2018
 
+# NOTE: THIS CODE IS VALID FOR MOST LAPTOPS
 
 from os import listdir
 from os.path import join, exists
 
 _PARENT = "/sys/class/power_supply/"
-_STAT = "uevent"
+_UEVENT = "uevent"
 _ACAD = "%sACAD/" % _PARENT
 _UPOWER = "/etc/UPower/UPower.conf"
 _LID = "/proc/acpi/button/lid/"
@@ -35,20 +36,29 @@ def _noner(fun):
     return wrapper
 
 
-def _get_stat(stat_: str) -> list:
-    bat = None
-    if exists(_PARENT):
-        for folder in listdir(_PARENT):
-            if folder.startswith("BAT"):
-                bat = folder
-                break
-        if bat is not None:
-            with open(join(_PARENT, bat, stat_), "r") as f:
+def _get_stat(stat_: str, adapter=False) -> list:
+    supply = None
+    try:
+        supplies = [folder for folder in listdir(_PARENT)]
+        if not adapter:
+            # WARNING: There will be a problem if there is more than one battery
+            # TODO:    To get better
+            for supply in supplies:
+                if supply.startswith("BAT"):
+                    break
+        else:
+            for supply in supplies:
+                if supply == "ACAD":
+                    break
+        if supply is not None:
+            with open(join(_PARENT, supply, stat_), "r") as f:
                 return f.readlines()
+    except FileNotFoundError:
+        return []
 
 
-def _get_uevent():
-        file = _get_stat(_STAT)
+def _get_uevent(adapter=False):
+        file = _get_stat(_UEVENT, adapter)
         if file is not None:
             res = {}
             for ln in file:
@@ -91,6 +101,10 @@ def _get_upower():
 
 
 stat = _get_uevent()
+
+####################
+# BATTERY METHODS:
+####################
 
 
 @_noner
@@ -205,20 +219,31 @@ def technology() -> str:
     return stat["technology"]
 
 
-@_noner
 def supply_type():
-    return _get_stat("type")[0]
+    try:
+        return _get_stat("type")[0]
+    except IndexError:
+        return
+
+##############
+# MISCELLANY:
+##############
 
 
-@_noner
 def lid_state():
     lid = None
-    for folder in listdir(_LID):
-        if folder.startswith("LID"):
-            lid = folder
-    if lid is not None:
-        with open(join(_LID, lid, "state"), "r") as f:
-            return f.readline().split()[1]
+    try:
+        for folder in listdir(_LID):
+            if folder.startswith("LID"):
+                lid = folder
+        if lid is not None:
+            with open(join(_LID, lid, "state"), "r") as f:
+                return f.readline().split()[1]
+    except FileNotFoundError:
+        return
 
-# YOU ARE HERE if not exists uvent, type, lid, etc (file and paths)
-print(supply_type())
+
+@_noner
+def ac_adapter_online():
+    stat = _get_uevent(True)
+    return bool(stat["online"])
