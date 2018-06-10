@@ -39,7 +39,7 @@ def logical_cpus() -> int:
     return len(_get_stat()) - 1
 
 
-def physical_cpus():
+def physical_cpus() -> int:
     """Return the number of physical processors"""
     # TODO: to get better
     with open(_CPUINFO, "rb") as file:
@@ -184,4 +184,3 @@ def uptime(str_format=False):
     with open(_UPTIME, "rb") as f:
         sec = float(f.readline().split()[0])
         return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
-
