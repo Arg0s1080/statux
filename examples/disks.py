@@ -36,4 +36,4 @@ print("Total KiB read: %.2f" % bytes_read(ptt, 3.0))
 ptt = choice(partitions)
 print("\n%s STAT.\nSleeping 5 seconds..." % ptt.upper())
 print("Average bytes per second (read, write): %s" %
-      str(bytes_read_write(ptt, interval=5, persecond=True, scale="bytes")))
+      str(bytes_read_write(ptt, interval=5, per_second=True, scale="bytes")))

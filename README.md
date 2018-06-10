@@ -1,5 +1,5 @@
 # Statux
-Some useful Linux data
+Statux es una librería 
 
 ## CPU
 ### Description
