@@ -79,10 +79,10 @@ def get_interfaces() -> list:
 def download_bytes(interface: str, scale="bytes", precision=2):
     """Returns total bytes downloaded in the chosen scale
 
-    Params:
-        interface (str): Interface name
-        scale     (str): Return scale (bytes, KiB, MiB, GiB, TiB, kB, MB, TB or auto)
-        precision (int): Number of rounding decimals
+        :Params:
+            :interface (str): Interface name
+            :scale     (str): Return scale (bytes, KiB, MiB, GiB, TiB, kB, MB, TB or auto)
+            :precision (int): Number of rounding decimals
 
     """
     return set_bytes(_get_bytes(interface, 0), scale_in="bytes", scale_out=scale, precision=precision)
@@ -91,10 +91,10 @@ def download_bytes(interface: str, scale="bytes", precision=2):
 def upload_bytes(interface: str, scale="bytes", precision=2):
     """Returns total bytes uploaded
 
-    Params:
-        interface (str): Interface name
-        scale     (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, MB, GB, TB or auto)
-        precision (int): Number of rounding decimals
+        :Params:
+            :interface (str): Interface name
+            :scale     (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, MB, GB, TB or auto)
+            :precision (int): Number of rounding decimals
 
     """
     return set_bytes(_get_bytes(interface, 1), scale_in="bytes", scale_out=scale, precision=precision)
@@ -103,10 +103,10 @@ def upload_bytes(interface: str, scale="bytes", precision=2):
 def down_up_bytes(interface: str, scale="bytes", precision=2):
     """Returns a tuple with bytes down-uploaded
 
-    Params:
-        interface (str): Interface name
-        scale     (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, MB, GB, TB or auto)
-        precision (int): Number of rounding decimals
+        :Params:
+            :interface (str): Interface name
+            :scale     (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, MB, GB, TB or auto)
+            :precision (int): Number of rounding decimals
 
     """
     bytes_ = _get_bytes(interface, 2)
@@ -116,10 +116,11 @@ def down_up_bytes(interface: str, scale="bytes", precision=2):
 def download_speed(interface: str, interval=0.0, scale="bytes", precision=2):
     """Returns average download speed per second
 
-    Params:
-        interface  (str): Interface name
-        scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
-        interval (float): Interval in seconds.
+        :Params:
+            :interface  (str): Interface name
+            :interval (float): Interval in seconds.
+            :scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
+            :precision  (int): Number of rounding decimals
 
     """
 
@@ -129,10 +130,11 @@ def download_speed(interface: str, interval=0.0, scale="bytes", precision=2):
 def upload_speed(interface: str, interval=0.0, scale="bytes", precision=2):
     """Returns average upload speed per second
 
-    Params:
-        interface  (str): Interface name
-        scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
-        interval (float): Interval in seconds.
+        :Params:
+            :interface  (str): Interface name
+            :interval (float): Interval in seconds.
+            :scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
+            :precision  (int): Number of rounding decimals
 
     """
 
@@ -142,10 +144,11 @@ def upload_speed(interface: str, interval=0.0, scale="bytes", precision=2):
 def down_up_speed(interface: str, interval=0.0, scale="bytes", precision=2):
     """Returns a tuple with average download-upload speed per second
 
-    Params:
-        interface  (str): Interface name
-        scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
-        interval (float): Interval in seconds.
+        :Params:
+            :interface  (str): Interface name
+            :interval (float): Interval in seconds.
+            :scale      (str): Chosen scale (bytes, KiB, MiB, GiB, TiB, kB, Mb, GB, TB or auto)
+            :precision  (int): Number of rounding decimals
     """
 
     stat = _set_delta(interface, interval)

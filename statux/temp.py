@@ -40,7 +40,6 @@ def _get_stat():
 
 def _get_stat_multi_physical_id():
     # Experimental: Created to work with more than one physical id
-    # TODO: Test. Will work fine? How is organized?
     res = {}
     ids = []
     for coretemp in listdir(_PARENT):
@@ -69,9 +68,9 @@ def x86_pkg(scale="celsius", precision=2) -> float:
 
     More info: https://www.kernel.org/doc/Documentation/thermal/x86_pkg_temperature_thermal
 
-    Params:
-        scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
-        precision (int): Number of rounding decimals
+    :Params:
+        :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
+        :precision (int): Number of rounding decimals
     """
     for path in listdir(_PKG_INPUT):
         if path.startswith("thermal_zone"):
@@ -83,9 +82,9 @@ def x86_pkg(scale="celsius", precision=2) -> float:
 def cores(scale="celsius", precision=2) -> list:
     """Returns a sorted list with digital thermal sensors values for each core
 
-    Params:
-        scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
-        precision (int): Number of rounding decimals
+    :Params:
+        :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
+        :precision (int): Number of rounding decimals
     """
     stat = _get_stat()
     return [set_celsius(stat[key], scale, precision) for key in sorted(stat) if key.startswith("Core")]
@@ -94,9 +93,9 @@ def cores(scale="celsius", precision=2) -> list:
 def cpu(scale="celsius", precision=2) -> float:
     """Returns measured value on the surface of the integrated heat spreader, also called CPU temperature
 
-    Params:
-        scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
-        precision (int): Number of rounding decimals
+    :Params:
+        :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
+        :precision (int): Number of rounding decimals
     """
     stat = _get_stat()
     for key in stat:
@@ -107,9 +106,9 @@ def cpu(scale="celsius", precision=2) -> float:
 def cores_multi(scale="celsius", precision=2) -> dict:
     """Returns a dict with digital thermal sensors values for each core. Each dict key is a physical id
 
-    Params:
-        scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
-        precision (int): Number of rounding decimals
+    :Params:
+        :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
+        :precision (int): Number of rounding decimals
 
     Note: Experimental
     """
@@ -121,9 +120,9 @@ def cores_multi(scale="celsius", precision=2) -> dict:
 def cpu_multi(scale="celsius", precision=2) -> dict:
     """Returns a dict with measured values on each surface of the integrated heat spreaders
 
-    Params:
-        scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
-        precision (int): Number of rounding decimals
+    :Params:
+        :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
+        :precision (int): Number of rounding decimals
 
     Note: Experimental
     """

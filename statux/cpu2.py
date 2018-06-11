@@ -44,13 +44,13 @@ class Load:
     def next_value(self, interval=0.0, per_core=False, precision=2):
         """ Returns CPU load percentage
 
-        Params:
-            interval (float): Seconds. When value is greater than zero, it returns cpu load percentage
+        :Params:
+            :interval (float): Seconds. When value is greater than zero, it returns cpu load percentage
                               in that period of time. When interval value is 0, it returns cpu load
                               percentage since the last call
-            per_core  (bool): When per_core is True it returns a list with values per logical cpu, if
+            :per_core  (bool): When per_core is True it returns a list with values per logical cpu, if
                               it's set to False returns a float with arithmetic mean of cores values.
-            precision  (int): Number of rounding decimals
+            :precision  (int): Number of rounding decimals
 
         """
         if self._last is None or interval > 0.0:
@@ -108,12 +108,12 @@ def physical_cpus():
 def frequency(per_core=True, scale="mhz", precision=3):
     """Returns current cpu frequency
 
-    Params:
-        per_core (bool): When per_core is True it returns a list with values per logical cpu,
-                         if it's set to False returns a float with arithmetic mean of cores
-                         values.
-        scale     (str): Return scale (Hz, KHz, MHz or GHz). MHz by default. Case insensitive
-        precision (int): Number of rounding decimals
+    :Params:
+        :per_core (bool): When per_core is True it returns a list with values per logical cpu,
+                          if it's set to False returns a float with arithmetic mean of cores
+                          values.
+        :scale     (str): Return scale (Hz, KHz, MHz or GHz). MHz by default. Case insensitive
+        :precision (int): Number of rounding decimals
 
     """
 
@@ -126,12 +126,12 @@ def frequency(per_core=True, scale="mhz", precision=3):
 def max_frequency(per_core=True, scale="mhz", precision=3):
     """Returns cpu max frequency
 
-        Params:
-            per_core (bool): When per_core is True it returns a list with values per logical cpu,
-                             if it's set to False returns a float with arithmetic mean of cores
-                             values.
-            scale     (str): Return scale (Hz, KHz, MHz or GHz). MHz by default. Case insensitive
-            precision (int): Number of rounding decimals
+        :Params:
+            :per_core (bool): When per_core is True it returns a list with values per logical cpu,
+                              if it's set to False returns a float with arithmetic mean of cores
+                              values.
+            :scale     (str): Return scale (Hz, KHz, MHz or GHz). MHz by default. Case insensitive
+            :precision (int): Number of rounding decimals
 
         """
     global _MAX_FREQUENCY
@@ -151,11 +151,11 @@ def max_frequency(per_core=True, scale="mhz", precision=3):
 def frequency_percent(per_core=True, precision=2):
     """Returns current cpu frequency percent
 
-            Params:
-                per_core (bool): When per_core is True it returns a list with values per logical cpu,
-                                 if it's set to False returns a float with arithmetic mean of cores
-                                 values.
-                precision (int): Number of rounding decimals. 2 by default.
+        :Params:
+            :per_core (bool): When per_core is True it returns a list with values per logical cpu,
+                              if it's set to False returns a float with arithmetic mean of cores
+                              values.
+            :precision (int): Number of rounding decimals. 2 by default.
 
     """
     global _MAX_FREQUENCY
@@ -167,9 +167,10 @@ def frequency_percent(per_core=True, precision=2):
 def boot_time(str_format=False):
     """Returns the time at which the system booted
 
-    Params:
-        str_format (bool): If is False returns seconds since the Unix epoch (January 1, 1970), if is set to
-                           True returns a formatted string with the system boot time. False by default.
+        :Params:
+            str_format (bool): If is False returns seconds since the Unix epoch (January 1, 1970),
+                               if is set to True returns a formatted string with the system boot
+                               time. False by default.
     """
     def sformat(v):
         from time import strftime, localtime
@@ -185,9 +186,9 @@ def boot_time(str_format=False):
 def uptime(str_format=False):
     """Returns the time elapsed since system boot time
 
-    Params:
-        str_format (bool): If is set to True returns a formatted string, seconds otherwise. False by
-                           default
+        :Params:
+            :str_format (bool): If is set to True returns a formatted string, seconds otherwise.
+                                False by default
     """
     from datetime import timedelta
     with open(_UPTIME, "rb") as f:

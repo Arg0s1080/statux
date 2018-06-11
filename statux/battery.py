@@ -193,8 +193,8 @@ def critical_power_action() -> str:
 def remaining_time(format=True) -> object:
     """Returns remaining battery life
 
-    Param:
-        format (bool): If format is False returns remaining seconds, a time format string (H:M) otherwise
+    :Param:
+        :format (bool): If format is False returns remaining seconds, a time format string (H:M) otherwise
         """
     current_now = current()
     try:
