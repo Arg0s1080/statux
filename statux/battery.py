@@ -220,6 +220,7 @@ def technology() -> str:
 
 
 def supply_type():
+    """Returns type of supply (Battery, Mains, UPS, etc)"""
     try:
         return _get_stat("type")[0]
     except IndexError:
@@ -231,6 +232,7 @@ def supply_type():
 
 
 def lid_state():
+    """Returns lid state (Open or Close)"""
     lid = None
     try:
         for folder in listdir(_LID):

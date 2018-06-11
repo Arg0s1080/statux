@@ -64,7 +64,6 @@ def _set_delta(interface: str, interval=0.0):
     _check_interface(interface, new_stat)
     _last = new_stat, time()
     delta = new_stat[interface][0] - old_stat[interface][0], new_stat[interface][1] - old_stat[interface][1]
-    # print("Debug. Time elapsed:", elapsed)
     return (0.0, 0.0) if not elapsed else (delta[0] / elapsed, delta[1] / elapsed)
 
 
@@ -77,7 +76,7 @@ def get_interfaces() -> list:
 
 
 def download_bytes(interface: str, scale="bytes", precision=2):
-    """Returns total bytes downloaded in the chosen scale
+    """Returns total bytes downloaded in the given interface
 
         :Params:
             :interface (str): Interface name
@@ -89,7 +88,7 @@ def download_bytes(interface: str, scale="bytes", precision=2):
 
 
 def upload_bytes(interface: str, scale="bytes", precision=2):
-    """Returns total bytes uploaded
+    """Returns total bytes uploaded in the given interface
 
         :Params:
             :interface (str): Interface name
@@ -101,7 +100,7 @@ def upload_bytes(interface: str, scale="bytes", precision=2):
 
 
 def down_up_bytes(interface: str, scale="bytes", precision=2):
-    """Returns a tuple with bytes down-uploaded
+    """Returns a tuple with bytes down-uploaded in the given interface
 
         :Params:
             :interface (str): Interface name
@@ -114,7 +113,7 @@ def down_up_bytes(interface: str, scale="bytes", precision=2):
 
 
 def download_speed(interface: str, interval=0.0, scale="bytes", precision=2):
-    """Returns average download speed per second
+    """Returns average download speed per second in the given interface
 
         :Params:
             :interface  (str): Interface name
@@ -128,7 +127,7 @@ def download_speed(interface: str, interval=0.0, scale="bytes", precision=2):
 
 
 def upload_speed(interface: str, interval=0.0, scale="bytes", precision=2):
-    """Returns average upload speed per second
+    """Returns average upload speed per second in the given interface
 
         :Params:
             :interface  (str): Interface name
@@ -142,7 +141,7 @@ def upload_speed(interface: str, interval=0.0, scale="bytes", precision=2):
 
 
 def down_up_speed(interface: str, interval=0.0, scale="bytes", precision=2):
-    """Returns a tuple with average download-upload speed per second
+    """Returns a tuple with average download-upload speed per second in the given interface
 
         :Params:
             :interface  (str): Interface name
