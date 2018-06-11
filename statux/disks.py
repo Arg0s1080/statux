@@ -29,8 +29,10 @@ _PARTITIONS = "%spartitions" % _STAT
 _DISKSTATS = "%sdiskstats" % _STAT
 _last = None
 
-# /sys/block/sda/queue/rotational
-# /sys/block/sda/removable
+
+def block_devices() -> list:
+    """Returns a list with block devices (HDD, SSD, pendrives, micro-sd, DVD, etc)"""
+    return [block for block in listdir(_BLOCK_DEV)]
 
 
 def partitions() -> list:
@@ -38,11 +40,37 @@ def partitions() -> list:
     with open(_PARTITIONS, "r") as f:
         stat = f.readlines()
         res = []
+        dsk = block_devices()
         for i in range(2, len(stat)):
             ptt = stat[i].split()[3]
-            if ptt[-1].isdigit():
+            if ptt not in dsk:
                 res.append(ptt)
     return res
+
+
+def _check_partitions(*partitions_):
+    valid_partitions = partitions()
+    for ptt in partitions_:
+        if ptt not in valid_partitions:
+            raise ValueError("%s is not a valid partition" % ptt)
+
+
+def _check_block(block):
+    if block not in block_devices():
+        raise ValueError("%s is not a valid block device" % block)
+    return block
+
+
+def is_rotational(block_device: str) -> bool:
+    """Returns True if the device is of rotational type, False otherwise"""
+    with open("%s%s%s%s" % (_BLOCK_DEV, _check_block(block_device), _QUEUE, "rotational"), "rb") as f:
+        return bool(int(f.read()))
+
+
+def is_removable(block_device: str) -> bool:
+    """Returns True is the device is removable, False otherwise"""
+    with open("%s%s%s" % (_BLOCK_DEV, _check_block(block_device), "/removable"), "rb") as f:
+        return bool(int(f.read()))
 
 
 def mounted_partitions() -> dict:
@@ -143,6 +171,7 @@ def _set_delta(*partitions_: str, interval=0.0, persecond=False):
     from time import sleep, time
     global _last
     if _last is None or interval > 0.0:
+        _check_partitions(*partitions_)
         old_stat = _get_disks_stats()
         sleep(interval)
         elapsed = interval
@@ -200,7 +229,7 @@ def bytes_write(partition: str, interval=0.0, per_second=False, scale="KiB", pre
                      scale_in="bytes", scale_out=scale, precision=precision)
 
 
-def bytes_read_write(partition: str, interval=0.0, per_second=False, scale="KiB", precision=2):
+def bytes_read_write(partition: str, interval=0.0, per_second=False, scale="KiB", precision=2) -> tuple:
     """Returns a tuple with bytes read and written in a partition in a certain time interval
 
         :Params:
@@ -213,12 +242,11 @@ def bytes_read_write(partition: str, interval=0.0, per_second=False, scale="KiB"
                                 KiB by default
             :precision  (int):  Number of rounding decimal
     """
-
     values = _set_delta(partition, interval=interval, persecond=per_second)
     return set_bytes(values[0], values[1], scale_in="bytes", scale_out=scale, precision=precision)
 
 
-def bytes_read_write_multi(*partitions_: str, interval=0.0, per_second=False, scale="KiB", precision=2):
+def bytes_read_write_multi(*partitions_: str, interval=0.0, per_second=False, scale="KiB", precision=2) -> dict:
     """Returns a dictionary with the bytes read and written in the given partitions.
 
         :Params:
@@ -231,8 +259,9 @@ def bytes_read_write_multi(*partitions_: str, interval=0.0, per_second=False, sc
                                 KiB by default
             :precision  (int):  Number of rounding decimal
     """
-
     dic = _set_delta(*partitions_, interval=interval, persecond=per_second)
+    if type(dic) == tuple:
+        dic = {partitions_[0]: dic}
     for key, value in dic.items():
         dic[key] = set_bytes(value[0], value[1], scale_in="bytes", scale_out=scale, precision=precision)
     return dic
