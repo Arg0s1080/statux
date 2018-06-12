@@ -10,7 +10,7 @@ with open(join(abspath(dirname(__file__)), "README.rst"), 'r') as readme:
 setup(
     name="statux",
     version=__version__,
-    description="Machine readable zone generator and checker for passports and other travel documents",
+    description="Python module for hardware and system monitoring",
     license="GPLv3",
     long_description=long_description,
     author='Ivan Rincon',
