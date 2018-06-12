@@ -18,11 +18,9 @@ from os import listdir
 from os.path import join
 from statux._conversions import set_mhz
 
-_PARENT = "/proc/"
-_STAT = "%sstat" % _PARENT
-_CPUINFO = "%scpuinfo" % _PARENT
-_UPTIME = "%suptime" % _PARENT
-_PARENT = "/proc/"
+_PROC = "/proc/"
+_STAT = "%sstat" % _PROC
+_CPUINFO = "%scpuinfo" % _PROC
 _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
 _MAX_FREQUENCY = None
 _last = None
@@ -155,33 +153,12 @@ def frequency_percent(per_core=True, precision=2):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-def boot_time(str_format=False):
-    """Returns the time at which the system booted
-
-        :Params:
-            str_format (bool): If is False returns seconds since the Unix epoch (January 1, 1970),
-                               if is set to True returns a formatted string with the system boot
-                               time. False by default.
-    """
-    def sformat(v):
-        from time import strftime, localtime
-        return strftime('%Y-%m-%d %H:%M:%S', localtime(v))
-
-    with open(_STAT, "rb") as f:
-        for line in f.readlines():
-            if line.startswith(b"btime"):
-                r = int(line.split()[1])
-                return r if not str_format else sformat(r)
-
-
-def uptime(str_format=False):
-    """Returns the time elapsed since system boot time
-
-        :Params:
-            :str_format (bool): If is set to True returns a formatted string, seconds otherwise.
-                                False by default
-    """
-    from datetime import timedelta
-    with open(_UPTIME, "rb") as f:
-        sec = float(f.readline().split()[0])
-        return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
+def is_64_bit():
+    """Returns True if CPU is 64 bit"""
+    with open(_CPUINFO, "r") as f:
+        lines = f.read().split("\n")
+        for line in lines:
+            if line.startswith("flags"):
+                if "lm" in line.split()[2:]:
+                    return True
+    return False
