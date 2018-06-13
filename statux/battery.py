@@ -190,18 +190,21 @@ def critical_power_action() -> str:
 
 
 @_noner
-def remaining_time(format=True) -> object:
+def remaining_time(format_time=True) -> object:
     """Returns remaining battery life
 
     :Param:
         :format (bool): If format is False returns remaining seconds, a time format string (H:M) otherwise
-        """
-    current_now = current()
+
+    """
     try:
-        value = charge() / current_now
-        return "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format else round(value * 3600)
+        current_now = current()
+        value = "inf" if voltage() > 0 and current_now == 0 else charge() / current_now
+        return (float("inf") if value == "inf"
+                else "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format_time
+                else round(value * 3600))
     except ZeroDivisionError:
-        return None
+        return
 
 
 @_noner
@@ -222,7 +225,7 @@ def technology() -> str:
 def supply_type():
     """Returns type of supply (Battery, Mains, UPS, etc)"""
     try:
-        return _get_stat("type")[0]
+        return _get_stat("type")[0][:-1]
     except IndexError:
         return
 
@@ -247,5 +250,5 @@ def lid_state():
 
 @_noner
 def ac_adapter_online():
-    stat = _get_uevent(True)
-    return bool(stat["online"])
+    stat_ = _get_uevent(True)
+    return bool(stat_["online"])

@@ -21,7 +21,7 @@ if is_present():
     print_txt("Supply type", supply_type())
     print_txt("Status", status())
     print_txt("Remaining Time", remaining_time())
-    print_txt("Remaining Time", remaining_time(format=False), "seconds")
+    print_txt("Remaining Time", remaining_time(format_time=False), "seconds")
     print_txt("Voltage", voltage(), "mV")
     print_txt("Current", current(), "mA")
     print_txt("Power", power(), "mW")
