@@ -39,7 +39,8 @@ class Load:
     def _get_stat() -> list:
         with open(_STAT, "rb") as file:
             stat = file.readlines()
-            return [list(map(int, stat[line].split()[1:])) for line in range(len(stat)) if stat[line].startswith(b"cpu")]
+            return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
+                    if stat[line].startswith(b"cpu")]
 
     def next_value(self, interval=0.0, per_core=False, precision=2):
         """ Returns CPU load percentage

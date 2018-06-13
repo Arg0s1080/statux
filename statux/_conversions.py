@@ -15,7 +15,7 @@
 
 
 def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
-    # Function returns a int if scale_out == 'bytes', a string if scale_out == 'auto', a float otherwise
+    # Function returns: int if scale_out == 'bytes', str if scale_out == 'auto', float otherwise
     f = []
     auto = True if scale_out == "auto" else False
     for value in values:
