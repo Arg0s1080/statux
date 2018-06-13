@@ -6,9 +6,11 @@
 #
 # (ɔ) Iván Rincón 2018
 
+from sys import path
+path.append(path[0].replace("examples", ""))
 
 from statux.ram import *
-from examples.functions import *
+from examples._functions import *
 
 
 def mem(scale):

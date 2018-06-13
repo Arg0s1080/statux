@@ -6,9 +6,11 @@
 #
 # (ɔ) Iván Rincón 2018
 
+from sys import path
+path.append(path[0].replace("examples", ""))
 
 from statux.battery import *
-from examples.functions import print_txt
+from examples._functions import print_txt
 
 
 if is_present():
@@ -34,4 +36,4 @@ if is_present():
 
 lid = lid_state()
 if lid is not None:
-    print(" \nLid is %s" % lid)
+    print_txt("Lid state", lid)
