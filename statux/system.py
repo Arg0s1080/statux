@@ -57,27 +57,27 @@ def uptime(str_format=False):
 def init() -> str:
     """Returns init system name (e.g.: systemd, sysvinit, upstart, etc)"""
     with open(_INIT, "r") as f:
-        return f.read()
+        return f.read()[:-1]
 
 
 def hostname() -> str:
     """Returns hostname"""
     with open("%shostname" % _INFO_KERNEL, "r") as f:
-        return f.read()
+        return f.read()[:-1]
 
 
 def kernel_release():
     """Returns kernel release (e.g.: '#25-Ubuntu SMP Wed May 23 18:02:16 UTC 2018')"""
     with open("%sosrelease" % _INFO_KERNEL, "r") as f:
-        return f.read()
+        return f.read()[:-1]
 
 
 def kernel_version():
     """Returns kernel version (e.g.: '4.15.0-23-generic')"""
     with open("%sversion" % _INFO_KERNEL, "r") as f:
-        return f.read()
+        return f.read()[:-1]
 
 
-def system_architecture():
+def architecture():
     """Returns the machine type, (e.g.: 'x86_64' or 'i386')"""
     return machine()
