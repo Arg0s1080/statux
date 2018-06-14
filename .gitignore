@@ -11,3 +11,6 @@ __pycache__/
 /test3.py
 /gitscript.sh
 .fuse_hidden*
+/dist/
+/build/
+/statux.egg-info/
