@@ -64,7 +64,7 @@ def _get_stat_multi_physical_id():
 
 
 def x86_pkg(scale="celsius", precision=2) -> float:
-    """Returns CPU digital temperature package level sensor value
+    """Returns value of CPU digital temperature package level sensor
 
     More info: https://www.kernel.org/doc/Documentation/thermal/x86_pkg_temperature_thermal
 

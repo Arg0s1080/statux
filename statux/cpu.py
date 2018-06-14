@@ -138,7 +138,7 @@ def max_frequency(per_core=True, scale="mhz", precision=3):
 
 
 def frequency_percent(per_core=True, precision=2):
-    """Returns current cpu frequency percent
+    """Returns current CPU frequency percent
 
         :Params:
             :per_core (bool): When per_core is True it returns a list with values per logical cpu,
