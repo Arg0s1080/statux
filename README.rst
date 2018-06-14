@@ -175,6 +175,8 @@ It is possible that some methods are not available in previous kernel versions
 
 Install:
 --------
-.. code:: bash
+
+::
+
     pip install statux
 
