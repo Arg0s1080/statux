@@ -57,16 +57,23 @@ def _get_stat(stat_: str, adapter=False) -> list:
         return []
 
 
-def _get_uevent(adapter=False):
-        file = _get_stat(_UEVENT, adapter)
-        if file is not None:
-            res = {}
-            for ln in file:
-                ln = ln.replace("POWER_SUPPLY_", "").split("=")
-                key = ln[0].lower()
-                value = ln[1][:-1]
-                res[key] = value if not value.isdigit() else int(value)
-            return res
+def _get_uevent(adapter):
+    file = _get_stat(_UEVENT, adapter)
+    if file is not None:
+        for ln in file:
+            ln = ln.replace("POWER_SUPPLY_", "").split("=")
+            v = ln[1][:-1]
+            yield ln[0].lower(), v if not v.isdigit() else int(v)
+
+
+def _get_values(adapter=False):
+    return {key: value for key, value in _get_uevent(adapter)}
+
+
+def _get_value(item: str, adapter=False):
+    for key, value in _get_uevent(adapter):
+        if key == item:
+            return value
 
 
 def _get_upower():
@@ -100,8 +107,6 @@ def _get_upower():
         return res
 
 
-stat = _get_uevent()
-
 ####################
 # BATTERY METHODS:
 ####################
@@ -110,6 +115,7 @@ stat = _get_uevent()
 @_noner
 def battery() -> dict:
     """Returns a dict with manufacturer, model and serial number of the battery"""
+    stat = _get_values()
     return {
         "Manufacturer":  stat["manufacturer"],
         "Model":         str(stat["model_name"]),
@@ -119,50 +125,60 @@ def battery() -> dict:
 
 @_noner
 def status() -> str:
-    """Returns the status battery (Full, Charging or Discharging)"""
-    return stat["status"]
+    """Returns the status battery ('Full', 'Charging' or 'Discharging')"""
+    return _get_value("status")
 
 
 @_noner
 def is_present() -> bool:
     """Return True if the battery is present, False otherwise"""
-    return bool(stat["present"])
+    return bool(_get_value("present"))
 
 
 @_noner
 def voltage() -> int:
     """Return the battery voltage (mV)"""
-    return round(stat["voltage_now"] / 10**3)
+    return round(_get_value("voltage_now") / 10**3)
 
 
 @_noner
 def current() -> int:
     """Return the battery current (mA)"""
-    return round(stat["current_now"] / 10**3)
+    return round(_get_value("current_now") / 10**3)
+
+
+@_noner
+def energy() -> int:
+    """Returns the battery energy value (mWh)"""
+    stat = _get_values()
+    voltage_, charge_ = stat["voltage_now"], stat["charge_now"]
+    return round(voltage_ * charge_ / 10**9)
 
 
 @_noner
 def power() -> int:
     """Return the battery power (mW)"""
-    return voltage() * current()
+    stat = _get_values()
+    voltage_, current_ = stat["voltage_now"], stat["current_now"]
+    return round(voltage_ * current_ / 10**9)
 
 
 @_noner
 def charge() -> int:
     """Returns the current battery charge (mAh)"""
-    return round(stat["charge_now"] / 10**3)
+    return round(_get_value("charge_now") / 10**3)
 
 
 @_noner
 def capacity() -> int:
     """Return the current percentage of the battery (%)"""
-    return stat["capacity"]
+    return _get_value("capacity")
 
 
 @_noner
 def capacity_level() -> str:
-    """Return the current battery capacity level (Full, Normal, Low or Critical)"""
-    return stat["capacity_level"]
+    """Return the current battery capacity level ('Full', 'Normal', 'Low' or 'Critical')"""
+    return _get_value("capacity_level")
 
 
 @_noner
@@ -185,21 +201,22 @@ def action_level() -> str:
 
 @_noner
 def critical_power_action() -> str:
-    """Returns critical power action (PowerOff, Hibernate or HybridSleep)"""
+    """Returns critical power action ('PowerOff', 'Hibernate' or 'HybridSleep')"""
     return _get_upower()["PowerAction"]
 
 
 @_noner
-def remaining_time(format_time=True) -> object:
+def remaining_time(format_time=False):
     """Returns remaining battery life
 
     :Param:
         :format (bool): If format is False returns remaining seconds, a time format string (H:M) otherwise
 
     """
+    stat = _get_values()
+    voltage_, current_, charge_ = stat["voltage_now"], stat["current_now"], stat["charge_now"]
     try:
-        current_now = current()
-        value = "inf" if voltage() > 0 and current_now == 0 else charge() / current_now
+        value = "inf" if voltage_ > 0 and current_ == 0 else charge_ / current_
         return (float("inf") if value == "inf"
                 else "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format_time
                 else round(value * 3600))
@@ -212,18 +229,21 @@ def wear_level() -> float:
     """Returns the wear level of the battery (%)
 
     It's a health indicator of the battery (less is better)
+
     """
-    return round(100 - (stat["charge_full"] / stat["charge_full_design"] * 100), 2)
+    stat = _get_values()
+    total_charge, design_charge = stat["charge_full"], stat["charge_full_design"]
+    return round(100 - (total_charge / design_charge * 100), 2)
 
 
 @_noner
 def technology() -> str:
     """Returns chemistry of the battery"""
-    return stat["technology"]
+    return _get_value("technology")
 
 
 def supply_type():
-    """Returns type of supply (Battery, Mains, UPS, etc)"""
+    """Returns type of supply ('Battery', 'Mains', 'UPS', etc)"""
     try:
         return _get_stat("type")[0][:-1]
     except IndexError:
@@ -235,7 +255,7 @@ def supply_type():
 
 
 def lid_state():
-    """Returns lid state (Open or Close)"""
+    """Returns lid state ('Open' or 'Close')"""
     lid = None
     try:
         for folder in listdir(_LID):
@@ -249,6 +269,6 @@ def lid_state():
 
 
 @_noner
-def ac_adapter_online():
-    stat_ = _get_uevent(True)
-    return bool(stat_["online"])
+def ac_adapter_online() -> bool:
+    """Returns True if AC adapter is online, False otherwise"""
+    return bool(_get_value("online", True))
