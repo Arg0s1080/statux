@@ -63,7 +63,7 @@ def _get_stat_multi_physical_id():
     return res
 
 
-def x86_pkg(scale="celsius", precision=2) -> float:
+def x86_pkg_BAD(scale="celsius", precision=2) -> float:
     """Returns value of CPU digital temperature package level sensor
 
     More info: https://www.kernel.org/doc/Documentation/thermal/x86_pkg_temperature_thermal
@@ -71,6 +71,8 @@ def x86_pkg(scale="celsius", precision=2) -> float:
     :Params:
         :scale     (str): Return scale Celsius, Fahrenheit, Kelvin or Rankine)
         :precision (int): Number of rounding decimals
+
+    NOTE: Does not work on many computers
     """
     for path in listdir(_PKG_INPUT):
         if path.startswith("thermal_zone"):
