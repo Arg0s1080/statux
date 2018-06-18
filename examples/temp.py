@@ -11,7 +11,6 @@ path.append(path[0].replace("examples", ""))
 
 from statux.temp import *
 
-print("Package Temp: %.2fC°" % x86_pkg())
 
 cores = cores()
 for i in range(len(cores)):
