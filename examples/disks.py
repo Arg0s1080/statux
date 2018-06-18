@@ -14,7 +14,7 @@ from time import sleep
 from random import choice
 
 print("Block", "Rotational", "Removable")
-for block in block_devices():
+for block in sorted(block_devices()):
     print(block.center(5),  str(is_rotational(block)).center(10), str(is_removable(block)).center(9))
 
 ptt_dict = mounted_partitions()
