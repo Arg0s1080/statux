@@ -77,7 +77,12 @@ def mounted_partitions() -> dict:
     """Returns a dict with mounted partitions and mount points"""
     def get_mounts():
         with open(_MOUNTS, "r") as file:
-            return {line.split()[0]: line.split()[1] for line in file.readlines() if line.startswith("/")}
+            res = {}
+            for line in file.readlines():
+                prt = line.split()
+                if line.startswith("/"):
+                    res[prt[0]] = prt[1].replace("\\040", " ")
+            return res
     res = {}
     mounts = get_mounts()
     for partition in partitions():
