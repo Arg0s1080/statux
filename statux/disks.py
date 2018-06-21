@@ -73,6 +73,19 @@ def is_removable(block_device: str) -> bool:
         return bool(int(f.read()))
 
 
+def mounts_info() -> dict:
+    """Returns a dict with mounted partitions and namedtuple with mount point, filesystem and mount options"""
+    from collections import namedtuple
+    with open(_MOUNTS, "r") as file:
+        data = namedtuple("mounts", "mount_point filesystem mount_options")
+        res = {}
+        for line in file.readlines():
+            ls = line.split()
+            if ls[0].startswith("/"):
+                res[ls[0].replace("/dev/", "")] = data(ls[1].replace("\\040", " "), ls[2], " ".join(ls[3:]))
+        return res
+
+
 def mounted_partitions() -> dict:
     """Returns a dict with mounted partitions and mount points"""
     def get_mounts():
