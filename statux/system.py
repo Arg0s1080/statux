@@ -22,7 +22,7 @@ _STAT = "%sstat" % _PARENT
 _UPTIME = "%suptime" % _PARENT
 _INIT = "%s1/comm" % _PARENT
 _INFO_KERNEL = "%ssys/kernel/" % _PARENT
-
+_SESSION_ID = "%sself/sessionid" % _PARENT
 
 def boot_time(str_format=False):
     """Returns the time at which the system booted
@@ -66,18 +66,24 @@ def hostname() -> str:
         return f.read()[:-1]
 
 
-def kernel_release():
+def kernel_release() -> str:
     """Returns kernel release (e.g.: '#25-Ubuntu SMP Wed May 23 18:02:16 UTC 2018')"""
     with open("%sosrelease" % _INFO_KERNEL, "r") as f:
         return f.read()[:-1]
 
 
-def kernel_version():
+def kernel_version() -> str:
     """Returns kernel version (e.g.: '4.15.0-23-generic')"""
     with open("%sversion" % _INFO_KERNEL, "r") as f:
         return f.read()[:-1]
 
 
-def architecture():
+def architecture() -> str:
     """Returns the machine type, (e.g.: 'x86_64' or 'i386')"""
     return machine()
+
+
+def session_id() -> int:
+    """Returns current session id"""
+    with open(_SESSION_ID, "rb") as f:
+        return int(f.readline())
