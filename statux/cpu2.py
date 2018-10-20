@@ -18,22 +18,31 @@ from os import listdir
 from os.path import join
 from statux._conversions import set_mhz
 
-_PARENT = "/proc/"
-_STAT = "%sstat" % _PARENT
-_CPUINFO = "%scpuinfo" % _PARENT
-_UPTIME = "%suptime" % _PARENT
-_PARENT = "/proc/"
+_PROC_PTH = "/proc/"
+_STAT = "%sstat" % _PROC_PTH
+_CPUINFO = "%scpuinfo" % _PROC_PTH
+_UPTIME = "%suptime" % _PROC_PTH
 _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
 _MAX_FREQUENCY = None
 
 
 class Load:
-    """Modification of statux.cpu made for Pycket project.
+    """ Class to get CPU Load Percentage.
 
-    It allows obtaining several percentage load values in the same time interval instantiating the class"""
-    def __init__(self):
+            :Params:
+                :initialize (bool): When initialize is True, next_value() is called to set self._last.
+                                    Useful, for example, if Load() is instantiated and after next_value()
+                                    is called from a timer. next_value() will return a value != 0.0 in
+                                    the first "tick"
+
+
+    It allows obtaining several percentage CPU load values in the same time interval instantiating
+    the class.
+    Note: Modification of statux.cpu made for Pycket project.
+    """
+    def __init__(self, initialize=False):
         self._last = None
-        self.next_value()  # The method is called to set self._last
+        initialize and self.next_value()
 
     @staticmethod
     def _get_stat() -> list:
@@ -85,12 +94,12 @@ class Load:
         return res if len(res) > 1 else res[0]
 
     def __len__(self):
-        return len(self._get_stat())
+        return len(self._get_stat()) - 1
 
 
 def logical_cpus() -> int:
     """Return the number of logical processors"""
-    return len(Load()) - 1
+    return len(Load())
 
 
 def physical_cpus():
