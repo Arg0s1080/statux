@@ -13,10 +13,12 @@
 #
 # (ɔ) Iván Rincón 2018
 
+import errno
 from time import sleep
 from os import listdir
 from os.path import join
 from statux._conversions import set_mhz
+from statux._errors import ValueNotFoundError
 
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
@@ -46,10 +48,13 @@ class Load:
 
     @staticmethod
     def _get_stat() -> list:
-        with open(_STAT, "rb") as file:
-            stat = file.readlines()
-            return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
-                    if stat[line].startswith(b"cpu")]
+        try:
+            with open(_STAT, "rb") as file:
+                stat = file.readlines()
+                return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
+                        if stat[line].startswith(b"cpu")]
+        except FileNotFoundError:
+            raise ValueNotFoundError("cpu stat", _STAT)
 
     def next_value(self, interval=0.0, per_core=False, precision=2):
         """ Returns CPU load percentage
@@ -98,21 +103,32 @@ class Load:
 
 
 def logical_cpus() -> int:
-    """Return the number of logical processors"""
     return len(Load())
 
 
 def physical_cpus():
     """Return the number of physical processors"""
     # TODO: to get better
-    with open(_CPUINFO, "rb") as file:
-        res = {}
-        stat = file.readlines()
-        for i in range(len(stat)):
-            if stat[i].startswith(b"physical id"):
-                physical_id = stat[i].split()[-1]
-                res[physical_id] = int(stat[i+3].split()[-1])
-        return sum(res.values())
+    err_no = 0
+    res = {}
+    try:
+        with open(_CPUINFO, "rb") as file:
+            stat = file.readlines()
+            for i in range(len(stat)):
+                if stat[i].startswith(b"physical id"):
+                    physical_id = int(stat[i].split()[-1])
+                    res[physical_id] = int(stat[i+3].split()[-1])
+            if not len(res):
+                err_no = errno.ENODATA
+    except ValueError:
+        err_no = errno.ENODATA
+    except FileNotFoundError:
+        err_no = errno.ENOENT
+    finally:
+        if err_no:
+            raise ValueNotFoundError("Number of physical processors", _CPUINFO, err_no)
+        else:
+            return sum(res.values())
 
 
 def frequency(per_core=True, scale="mhz", precision=3):
@@ -130,6 +146,8 @@ def frequency(per_core=True, scale="mhz", precision=3):
     with open(_CPUINFO, "rb") as file:
         stat = file.readlines()
         r = [round(set_mhz(float(line.split()[-1]), scale), precision) for line in stat if line.startswith(b"cpu MHz")]
+        if not len(r):
+            raise(ValueNotFoundError("cpu frequency", _CPUINFO, errno.ENODATA))
         return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
@@ -146,13 +164,20 @@ def max_frequency(per_core=True, scale="mhz", precision=3):
         """
     global _MAX_FREQUENCY
     r = []
-    for policy in listdir(_FREQUENCY_POLICY):
-        if policy.startswith("policy"):
-            for file in listdir(join(_FREQUENCY_POLICY, policy)):
-                if file == "cpuinfo_max_freq":
-                    with open(join(_FREQUENCY_POLICY, policy, file), "rb") as stat:
-                        r.insert(int(policy[-1]), int(stat.readline()) / 1000)
-                    break
+    err_no = 0
+    try:
+        for policy in listdir(_FREQUENCY_POLICY):
+            if policy.startswith("policy"):
+                for file in listdir(join(_FREQUENCY_POLICY, policy)):
+                    if file == "cpuinfo_max_freq":
+                        with open(join(_FREQUENCY_POLICY, policy, file), "rb") as stat:
+                            r.insert(int(policy[-1]), int(stat.readline()) / 1000)
+                        break
+    except ValueError:
+        err_no = errno.ENODATA
+    err_no = errno.ENOENT if not len(r) else err_no
+    if err_no:
+        raise ValueNotFoundError("cpu max frequency", _FREQUENCY_POLICY, err_no)
     if _MAX_FREQUENCY is None:
         _MAX_FREQUENCY = r
     r = list(map(lambda x: round(set_mhz(x, scale), precision), r))
