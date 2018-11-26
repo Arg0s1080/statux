@@ -13,12 +13,11 @@
 #
 # (ɔ) Iván Rincón 2018
 
-import errno
 from time import sleep
 from os import listdir
 from os.path import join
 from statux._conversions import set_mhz
-from statux._errors import ValueNotFoundError
+from statux._errors import *
 
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
@@ -28,6 +27,7 @@ _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
 _MAX_FREQUENCY = None
 
 
+@ex_handler(_STAT, "CPU load")
 class Load:
     """ Class to get CPU Load Percentage.
 
@@ -48,13 +48,10 @@ class Load:
 
     @staticmethod
     def _get_stat() -> list:
-        try:
-            with open(_STAT, "rb") as file:
-                stat = file.readlines()
-                return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
-                        if stat[line].startswith(b"cpu")]
-        except FileNotFoundError:
-            raise ValueNotFoundError("cpu stat", _STAT)
+        with open(_STAT, "rb") as file:
+            stat = file.readlines()
+            return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
+                    if stat[line].startswith(b"cpu")]
 
     def next_value(self, interval=0.0, per_core=False, precision=2):
         """ Returns CPU load percentage
@@ -96,39 +93,34 @@ class Load:
             active_dif = sum(new_active) - sum(old_active)
 
             res.append(round(active_dif / total_dif * 100, precision) if total_dif != 0 else 0.0)
-        return res if len(res) > 1 else res[0]
+        len_ = len(res)
+        if len_ < 1:
+            raise ValueNotFoundError("CPU Load", _STAT, errno.ENODATA)
+        return res if len_ > 1 else res[0]
 
     def __len__(self):
         return len(self._get_stat()) - 1
 
 
+@ex_handler(_STAT)
 def logical_cpus() -> int:
     return len(Load())
 
 
+@ex_handler(_CPUINFO)
 def physical_cpus():
     """Return the number of physical processors"""
     # TODO: to get better
-    err_no = 0
-    res = {}
-    try:
-        with open(_CPUINFO, "rb") as file:
-            stat = file.readlines()
-            for i in range(len(stat)):
-                if stat[i].startswith(b"physical id"):
-                    physical_id = int(stat[i].split()[-1])
-                    res[physical_id] = int(stat[i+3].split()[-1])
-            if not len(res):
-                err_no = errno.ENODATA
-    except ValueError:
-        err_no = errno.ENODATA
-    except FileNotFoundError:
-        err_no = errno.ENOENT
-    finally:
-        if err_no:
-            raise ValueNotFoundError("Number of physical processors", _CPUINFO, err_no)
-        else:
-            return sum(res.values())
+    with open(_CPUINFO, "rb") as file:
+        res = {}
+        stat = file.readlines()
+        for i in range(len(stat)):
+            if stat[i].startswith(b"physical id"):
+                physical_id = int(stat[i].split()[-1])
+                res[physical_id] = int(stat[i+3].split()[-1])
+        if not len(res):
+            raise ValueNotFoundError("physical cpu's", _CPUINFO, errno.ENODATA)
+        return sum(res.values())
 
 
 def frequency(per_core=True, scale="mhz", precision=3):
@@ -200,6 +192,7 @@ def frequency_percent(per_core=True, precision=2):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
+@ex_handler(_STAT)
 def boot_time(str_format=False):
     """Returns the time at which the system booted
 
@@ -209,16 +202,18 @@ def boot_time(str_format=False):
                                time. False by default.
     """
     def sformat(v):
-        from time import strftime, localtime
         return strftime('%Y-%m-%d %H:%M:%S', localtime(v))
-
+    from time import strftime, localtime, time
     with open(_STAT, "rb") as f:
         for line in f.readlines():
             if line.startswith(b"btime"):
                 r = int(line.split()[1])
+                if r > time():
+                    raise UnexpectedValueError("value obtained is greater than time()", r, time())
                 return r if not str_format else sformat(r)
 
 
+@ex_handler(_UPTIME)
 def uptime(str_format=False):
     """Returns the time elapsed since system boot time
 
@@ -229,4 +224,4 @@ def uptime(str_format=False):
     from datetime import timedelta
     with open(_UPTIME, "rb") as f:
         sec = float(f.readline().split()[0])
-        return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
+        return str(timedelta(seconds=sec)).rstrip("0").rstrip(".").rstrip(":") if str_format else sec
