@@ -23,6 +23,15 @@ _UPTIME = "%suptime" % _PARENT
 _INIT = "%s1/comm" % _PARENT
 _INFO_KERNEL = "%ssys/kernel/" % _PARENT
 _SESSION_ID = "%sself/sessionid" % _PARENT
+_OS_RELEASE = "/etc/os-release"
+
+
+def _get_os_release():
+    def rpl(value):
+        return value.replace('"', "").replace("'", '').replace("\n", "")
+    with open(_OS_RELEASE, "r") as f:
+        return {line.split("=")[0]: rpl(line.split("=")[1]) for line in f.readlines()}
+
 
 def boot_time(str_format=False):
     """Returns the time at which the system booted
@@ -87,3 +96,23 @@ def session_id() -> int:
     """Returns current session id"""
     with open(_SESSION_ID, "rb") as f:
         return int(f.readline())
+
+
+def distro_name() -> str:
+    """Returns distro short name"""
+    return _get_os_release()["NAME"]
+
+
+def distro_full_name() -> str:
+    """Returns distro full name"""
+    return _get_os_release()["PRETTY_NAME"]
+
+
+def distro_version() -> str:
+    """Return distro version"""
+    return _get_os_release()["VERSION"]
+
+
+def distro_url() -> str:
+    """Returns distro home url"""
+    return _get_os_release()["HOME_URL"]
