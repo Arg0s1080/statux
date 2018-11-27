@@ -27,6 +27,7 @@ _PB_SIZE = "%sphysical_block_size" % _QUEUE
 _MOUNTS = "%smounts" % _STAT
 _PARTITIONS = "%spartitions" % _STAT
 _DISKSTATS = "%sdiskstats" % _STAT
+
 _last = None
 
 
