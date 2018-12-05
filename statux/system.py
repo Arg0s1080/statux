@@ -33,7 +33,7 @@ def _get_os_release():
         return {line.split("=")[0]: rpl(line.split("=")[1]) for line in f.readlines()}
 
 
-def boot_time(str_format=False):
+def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
     """Returns the time at which the system booted
 
         :Params:
@@ -41,14 +41,11 @@ def boot_time(str_format=False):
                                if is set to True returns a formatted string with the system boot
                                time. False by default.
     """
-    def sformat(v):
-        return strftime('%Y-%m-%d %H:%M:%S', localtime(v))
-
     with open(_STAT, "rb") as f:
         for line in f.readlines():
             if line.startswith(b"btime"):
                 r = int(line.split()[1])
-                return r if not str_format else sformat(r)
+                return r if not str_format else strftime(time_format, localtime(r))
 
 
 def uptime(str_format=False):
