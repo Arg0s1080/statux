@@ -35,11 +35,23 @@ class ValueNotFoundError(OSError, StatuxError):
         self.filename = filename
         self.strerror = msg or ("%s: %s not found in %s" %
                                 (strerror(self.errno), self.value, basename(self.filename)))
-        self.args = (self.errno, self.strerror, self.filename)
+        self.args = (self.errno, self.strerror, self.filename, self.value)
         super(OSError, self).__init__(self.errno, self.strerror, self.filename)
 
     def __repr__(self):
         return str(self.args)
+
+
+class DeviceNotFoundError(ValueNotFoundError):
+    def __init__(self, value, filename, device, msg="", err_no=errno.ENODEV):
+        self.errno = err_no
+        self.value = value
+        self.filename = filename
+        self.device = device
+        self.strerror = msg or ("%s: %s not found. Search for %s in %s" %
+                                (strerror(self.errno), self.device, self.value, basename(self.filename)))
+        self.args = (self.errno, self.strerror, self.filename, self.value, self.device)
+        super(ValueNotFoundError, self).__init__(self.value, self.filename, self.errno, msg)
 
 
 class UnexpectedValueError(ValueError, StatuxError):
@@ -54,7 +66,7 @@ class UnexpectedValueError(ValueError, StatuxError):
         return str(self.args)
 
 
-def ex_handler(filename, value=""):
+def cpu_ex_handler(filename, value=""):
     def raiser(fun):
         def wrapper(*args, **kwargs):
             def get_value():
