@@ -27,7 +27,7 @@ _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
 _MAX_FREQUENCY = None
 
 
-@ex_handler(_STAT, "CPU load")
+@cpu_ex_handler(_STAT, "CPU load")
 class Load:
     """ Class to get CPU Load Percentage.
 
@@ -102,12 +102,12 @@ class Load:
         return len(self._get_stat()) - 1
 
 
-@ex_handler(_STAT)
+@cpu_ex_handler(_STAT)
 def logical_cpus() -> int:
     return len(Load())
 
 
-@ex_handler(_CPUINFO)
+@cpu_ex_handler(_CPUINFO)
 def physical_cpus():
     """Return the number of physical processors"""
     # TODO: to get better
@@ -192,7 +192,7 @@ def frequency_percent(per_core=True, precision=2):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-@ex_handler(_STAT)
+@cpu_ex_handler(_STAT)
 def boot_time(str_format=False):
     """Returns the time at which the system booted
 
@@ -213,7 +213,7 @@ def boot_time(str_format=False):
                 return r if not str_format else sformat(r)
 
 
-@ex_handler(_UPTIME)
+@cpu_ex_handler(_UPTIME)
 def uptime(str_format=False):
     """Returns the time elapsed since system boot time
 
