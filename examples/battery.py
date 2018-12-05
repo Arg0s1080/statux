@@ -33,6 +33,7 @@ if is_present():
     print_txt("Low level", low_level())
     print_txt("Action level", action_level())
     print_txt("Power action", critical_power_action())
+    print_txt("AC Adapter Online", ac_adapter_online())
 
 lid = lid_state()
 if lid is not None:
