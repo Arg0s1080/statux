@@ -158,15 +158,19 @@ def energy() -> int:
 # @_noner
 def power() -> int:
     """Return the battery power (mW)"""
+    stat = _get_values()
     try:
-        stat = _get_values()
         voltage_, current_ = stat["voltage_now"], stat["current_now"]
     except KeyError as ex:
         if ex.args[0] is "current_now":  # current value is not given...
-            voltage_, current_ = _get_value("voltage_now"), current() * 10**3
+            #voltage_, current_ = stat["voltage_now"], current() * 10**3
+            # TODO: Check (above and below)
+            voltage_ = stat["voltage_now"]
+            current_ = voltage_ * stat["power_now"] / 10**6
         else:
             raise
     return round(voltage_ * current_ / 10 ** 9)
+
 
 # @_noner
 def charge() -> int:
@@ -224,14 +228,18 @@ def remaining_time(format_time=False):
 
     """
     stat = _get_values()
-    voltage_, current_, charge_ = stat["voltage_now"], stat["current_now"], stat["charge_now"]
+    # TODO: Check
     try:
-        value = "inf" if voltage_ > 0 and current_ == 0 else charge_ / current_
-        return (float("inf") if value == "inf"
-                else "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format_time
-                else round(value * 3600))
-    except ZeroDivisionError:
-        return
+        dividend, divider, voltage_ = stat["charge_now"], stat["current_now"], stat["voltage_now"]
+    except KeyError as ex:
+        if ex.args[0] is "current_now" or ex.args[0] is "charge_now":
+            dividend, divider, voltage_ = stat["energy_now"], stat["power_now"], stat["voltage_now"]
+        else:
+            raise
+    na = stat["status"] != "Discharging" or (voltage_ > 0 and divider == 0)
+    value = not na and dividend / divider
+    return (float("inf") if na else "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format_time
+            else round(value * 3600))
 
 
 # @_noner
@@ -242,8 +250,14 @@ def wear_level() -> float:
 
     """
     stat = _get_values()
-    total_charge, design_charge = stat["charge_full"], stat["charge_full_design"]
-    return round(100 - (total_charge / design_charge * 100), 2)
+    try:  # Let's try to get charge values
+        full, design = stat["charge_full"], stat["charge_full_design"]
+    except KeyError as ex:
+        if ex.args[0].startswith("charge_"):   # Charges values are not given, so let's try to get energy values
+            full, design = stat["energy_full"], stat["energy_full_design"]
+        else:
+            raise
+    return round(100 - (full / design * 100), 2)
 
 
 # @_noner
