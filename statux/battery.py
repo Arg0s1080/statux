@@ -20,6 +20,7 @@ from os import listdir
 from os.path import join, exists
 from statux._errors import *
 
+
 _PARENT = "/sys/class/power_supply/"
 _UEVENT = "uevent"
 _UPOWER = "/etc/UPower/UPower.conf"
@@ -40,14 +41,18 @@ def _noner(fun):
 def _get_stat(file: str, supply: str) -> list:
     supply_ = None
     try:
+        # TODO: More than one supply support
         for supply_ in [folder for folder in listdir(_PARENT)]:  # for supply in supplies
             if supply_.startswith(supply):
-                break
+                break  # First supply is chosen
         if supply_ is not None:
             with open(join(_PARENT, supply_, file), "r") as f:
-            # with open("/home/ivan/Escritorio/uevent_BAT0_Fedora_VBox.fake") as f:  # TODO: Delete
-                    return f.readlines()
+            # TODO: Delete lines below
+            #with open("/home/ivan/Escritorio/uevent_BAT0_Fedora_VBox_discharging.fake") as f:
+            #with open("/home/ivan/Escritorio/uevent_BAT1_Neon.fake") as f:
+                return f.readlines()
     except FileNotFoundError:
+        # TODO: Handle exception
         raise
 
 
@@ -141,8 +146,9 @@ def current() -> int:
     if current_ is None:  # current value is not given...
         stat = _get_values()
         power_, voltage_ = stat["power_now"], stat["voltage_now"]  # so, let's try to get power and voltage
-        return round(power_ * voltage_ / 10**9)
+        return round(power_ / voltage_ * 10**3)
     return round(current_ / 10**3)
+
 
 # @_noner
 def energy() -> int:
@@ -161,14 +167,8 @@ def power() -> int:
     stat = _get_values()
     try:
         voltage_, current_ = stat["voltage_now"], stat["current_now"]
-    except KeyError as ex:
-        if ex.args[0] is "current_now":  # current value is not given...
-            #voltage_, current_ = stat["voltage_now"], current() * 10**3
-            # TODO: Check (above and below)
-            voltage_ = stat["voltage_now"]
-            current_ = voltage_ * stat["power_now"] / 10**6
-        else:
-            raise
+    except KeyError:
+        return round(stat["power_now"] / 10 ** 3)
     return round(voltage_ * current_ / 10 ** 9)
 
 
@@ -228,14 +228,10 @@ def remaining_time(format_time=False):
 
     """
     stat = _get_values()
-    # TODO: Check
     try:
         dividend, divider, voltage_ = stat["charge_now"], stat["current_now"], stat["voltage_now"]
-    except KeyError as ex:
-        if ex.args[0] is "current_now" or ex.args[0] is "charge_now":
-            dividend, divider, voltage_ = stat["energy_now"], stat["power_now"], stat["voltage_now"]
-        else:
-            raise
+    except KeyError:
+        dividend, divider, voltage_ = stat["energy_now"], stat["power_now"], stat["voltage_now"]
     na = stat["status"] != "Discharging" or (voltage_ > 0 and divider == 0)
     value = not na and dividend / divider
     return (float("inf") if na else "%d:%02d" % (int(value), round((value - int(value)) * 60)) if format_time
@@ -252,11 +248,8 @@ def wear_level() -> float:
     stat = _get_values()
     try:  # Let's try to get charge values
         full, design = stat["charge_full"], stat["charge_full_design"]
-    except KeyError as ex:
-        if ex.args[0].startswith("charge_"):   # Charges values are not given, so let's try to get energy values
-            full, design = stat["energy_full"], stat["energy_full_design"]
-        else:
-            raise
+    except KeyError:
+        full, design = stat["energy_full"], stat["energy_full_design"]
     return round(100 - (full / design * 100), 2)
 
 
@@ -271,6 +264,7 @@ def supply_type():
     try:
         return _get_stat("type", supply="BAT")[0][:-1]
     except IndexError:
+        # TODO: Handle exception
         return
 
 ##############
@@ -289,6 +283,7 @@ def lid_state():
             with open(join(_LID, lid, "state"), "r") as f:
                 return f.readline().split()[1]
     except FileNotFoundError:
+        # TODO: Handle exception
         return
 
 
@@ -296,3 +291,4 @@ def lid_state():
 def ac_adapter_online() -> bool:
     """Returns True if AC adapter is online, False otherwise"""
     return bool(_get_value("online", supply="ACAD"))
+
