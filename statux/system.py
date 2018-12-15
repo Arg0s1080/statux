@@ -101,7 +101,7 @@ def distro_name() -> str:
 
 
 def distro_full_name() -> str:
-    """Returns distro full name"""
+    """Returns full distro description"""
     return _get_os_release()["PRETTY_NAME"]
 
 
@@ -113,3 +113,14 @@ def distro_version() -> str:
 def distro_url() -> str:
     """Returns distro home url"""
     return _get_os_release()["HOME_URL"]
+
+
+def linux_distribution():
+    """Returns a tuple with the Linux distribution info (distro id, distro version, version codename)
+
+    Emulation of the output of the linux_distribution() method (deprecated) of sys.platform.
+    Unlike sys.platform.linux_distribution, info it's got from /etc/os-release
+
+    """
+    info = _get_os_release()
+    return info["ID"], info["VERSION_ID"], info["VERSION_CODENAME"]
