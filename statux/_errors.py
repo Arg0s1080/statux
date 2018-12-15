@@ -14,6 +14,7 @@
 # (ɔ) Iván Rincón 2018
 
 import errno
+from sys import platform
 from os import strerror
 from os.path import basename
 
@@ -39,7 +40,7 @@ class ValueNotFoundError(OSError, StatuxError):
         super(OSError, self).__init__(self.errno, self.strerror, self.filename)
 
     def __repr__(self):
-        return str(self.args)
+        return "%s%s" % (self.__class__.__name__, self.args)
 
 
 class DeviceNotFoundError(ValueNotFoundError):
@@ -53,6 +54,9 @@ class DeviceNotFoundError(ValueNotFoundError):
         self.args = (self.errno, self.strerror, self.filename, self.value, self.device)
         super(ValueNotFoundError, self).__init__(self.value, self.filename, self.errno, msg)
 
+    def __repr__(self):
+        return "%s%s" % (self.__class__.__name__, self.args)
+
 
 class UnexpectedValueError(ValueError, StatuxError):
     def __init__(self, msg, cause, expected=None):
@@ -63,7 +67,18 @@ class UnexpectedValueError(ValueError, StatuxError):
         super(ValueError, self).__init__(self.msg, self.cause, self.expected)
 
     def __repr__(self):
-        return str(self.args)
+        return "%s%s" % (self.__class__.__name__, self.args)
+
+
+class PlatformError(RuntimeError, StatuxError):
+    def __init__(self, os):
+        self.platform = os
+        self.strerror = "'%s' platform is not supported. Statux only works on Linux" % os.title()
+        self.args = (self.strerror, self.platform)
+        super(RuntimeError, self).__init__(self.strerror, self.platform)
+
+    def __repr__(self):
+        return "%s%s" % (self.__class__.__name__, self.args)
 
 
 def cpu_ex_handler(filename, value=""):
@@ -82,3 +97,7 @@ def cpu_ex_handler(filename, value=""):
                 raise ValueNotFoundError(value or get_value(), filename, errno.ENOMSG, msg=msg)
         return wrapper
     return raiser
+
+
+if not platform.startswith("linux"):
+    raise PlatformError(platform)
