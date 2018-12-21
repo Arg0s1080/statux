@@ -81,6 +81,17 @@ class PlatformError(RuntimeError, StatuxError):
         return "%s%s" % (self.__class__.__name__, self.args)
 
 
+class PartitionNotMountError(StatuxError):
+    def __init__(self, partition):
+        self.partition = partition
+        self.strerror = "%s is not mount" % self.partition
+        self.args = partition
+        super(PartitionNotMountError, self).__init__(self.partition)
+
+    def __repr__(self):
+        return "%s%s" % (self.__class__.__name__, self.args)
+
+
 def cpu_ex_handler(filename, value=""):
     def raiser(fun):
         def wrapper(*args, **kwargs):
