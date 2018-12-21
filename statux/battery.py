@@ -13,8 +13,10 @@
 #
 # (ɔ) Iván Rincón 2018
 
-# TODO: Find out how its work in desktop
-# NOTE: THIS CODE IS VALID FOR MOST LAPTOPS
+# NOTE: THIS CODE IS VALID FOR MOST LAPTOPS. IN CASE OF HAVING MORE THAN ONE SUPPLY,
+#       ONLY THE FIRST ONE WILL BE DETECTED
+# TODO: *1st* Find out how its work in desktop
+# TODO: Handle exceptions
 
 from os import listdir
 from os.path import join, exists
