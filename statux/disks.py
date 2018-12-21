@@ -13,10 +13,11 @@
 #
 # (ɔ) Iván Rincón 2018
 
-
+import errno
 from os import statvfs
 from os import listdir
 from statux._conversions import set_bytes
+from statux._errors import UnexpectedValueError, ValueNotFoundError, PartitionNotMountError
 
 _STAT = "/proc/"
 _DEV = "/dev/"
@@ -53,12 +54,15 @@ def _check_partitions(*partitions_):
     valid_partitions = partitions()
     for ptt in partitions_:
         if ptt not in valid_partitions:
-            raise ValueError("%s is not a valid partition" % ptt)
+            raise ValueNotFoundError(ptt, _PARTITIONS, errno.ENODATA)
+    return partitions_
 
 
 def _check_block(block):
-    if block not in block_devices():
-        raise ValueError("%s is not a valid block device" % block)
+    valid_block_devices = block_devices()
+    if block not in valid_block_devices:
+        raise ValueNotFoundError(block, "%s%s/" % (_BLOCK_DEV, block), errno.ENODEV,
+                                 msg="%s not found in %s" % (block, _BLOCK_DEV))
     return block
 
 
@@ -97,13 +101,13 @@ def mounted_partitions() -> dict:
                 if line.startswith("/"):
                     res[prt[0]] = prt[1].replace("\\040", " ")
             return res
-    res = {}
+    result = {}
     mounts = get_mounts()
     for partition in partitions():
         dev = "%s%s" % (_DEV, partition)
         if dev in mounts.keys():
-            res[partition] = mounts[dev]
-    return res
+            result[partition] = mounts[dev]
+    return result
 
 
 def _get_stat(partition):
@@ -111,7 +115,7 @@ def _get_stat(partition):
     try:
         return statvfs(mounts[partition])
     except KeyError:
-        raise ValueError("Partition not mount")
+        raise PartitionNotMountError(_check_partitions(partition)[0])
 
 
 def _get_disks_stats():
@@ -127,7 +131,7 @@ def _get_disks_stats():
         for line in stat:
             ln = line.split()
             partition = ln[2]
-            bsize = get_bs(partition, True)  # logical block size
+            bsize = get_bs(partition, True)  # True: logical block size, False: Physical block size
             res[str(partition)] = int(ln[5]) * bsize, int(ln[9]) * bsize
     return res
 
