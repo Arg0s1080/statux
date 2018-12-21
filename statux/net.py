@@ -13,8 +13,9 @@
 #
 # (ɔ) Iván Rincón 2018
 
-
+import errno
 from statux._conversions import set_bytes
+from statux._errors import ValueNotFoundError
 
 
 _STAT_PATH = "/proc/net/dev"
@@ -33,7 +34,7 @@ def _get_stat():
 
 def _check_interface(interface: str, stat: dict):
     if interface not in stat.keys():
-        raise ValueError("Interface not found")
+        raise ValueNotFoundError(interface, _STAT_PATH, errno.ENODEV)
     return interface
 
 
