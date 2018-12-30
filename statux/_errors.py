@@ -37,6 +37,7 @@ class ValueNotFoundError(OSError, StatuxError):
         self.strerror = msg or ("%s: %s not found in %s" %
                                 (strerror(self.errno), self.value, basename(self.filename)))
         self.args = (self.errno, self.strerror, self.filename, self.value)
+        #super(ValueNotFoundError, self).__init__(self.value, self.filename, self.strerror)
         super(OSError, self).__init__(self.errno, self.strerror, self.filename)
 
     def __repr__(self):
@@ -92,20 +93,32 @@ class PartitionNotMountError(StatuxError):
         return "%s%s" % (self.__class__.__name__, self.args)
 
 
-def cpu_ex_handler(filename, value=""):
+class UnsupportedScaleError(ValueError, StatuxError):
+    def __init__(self, scale):
+        self.scale = scale
+        self.strerror = "Unsupported scale"
+        self.args = self.scale, self.strerror
+        super(ValueError, self).__init__(self.strerror, self.scale)
+
+    def __repr__(self):
+        return "%s%s%s" % (self.__class__.__name__, self.strerror, self.args)
+
+
+def ex_handler(filename, value=""):
     def raiser(fun):
         def wrapper(*args, **kwargs):
-            def get_value():
+            def get_name():
+                # Returns method name
                 return fun.__name__.replace("_", " ")
             try:
                 return fun(*args, **kwargs)
             except UnexpectedValueError:
                 raise
             except FileNotFoundError:
-                raise ValueNotFoundError(value or get_value(), filename, errno.ENOENT, msg=strerror(errno.ENOENT))
+                raise ValueNotFoundError(value or get_name(), filename, errno.ENOENT, msg=strerror(errno.ENOENT))
             except ValueError as ex:
                 msg = "%s: %s" % (strerror(errno.ENOMSG), ex.args[0])
-                raise ValueNotFoundError(value or get_value(), filename, errno.ENOMSG, msg=msg)
+                raise ValueNotFoundError(value or get_name(), filename, errno.ENOMSG, msg=msg)
         return wrapper
     return raiser
 
