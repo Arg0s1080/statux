@@ -13,6 +13,8 @@
 #
 # (ɔ) Iván Rincón 2018
 
+from statux._errors import UnsupportedScaleError
+
 
 def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
     # Function returns: int if scale_out == 'bytes', str if scale_out == 'auto', float otherwise
@@ -33,7 +35,7 @@ def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
         elif scale_in == "gib":
             bytes_ = value * 2**20
         else:
-            raise ValueError("Unsupported scale")
+            raise UnsupportedScaleError(scale_in)
         if auto:
             if bytes_ >= 2**40:
                 scale_out = "TiB"
@@ -64,7 +66,7 @@ def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
         elif scale_out.lower() == "tib":
             r = bytes_ / 2**40
         else:
-            raise ValueError("Unsupported scale")
+            raise UnsupportedScaleError(scale_out)
         res = round(r, precision) if not auto else "%s %s" % (round(r, precision), scale_out)
         f.append(res)
 
@@ -82,7 +84,7 @@ def set_mhz(value: float, scale="mhz"):
     elif scale.lower() == "hz":
         f = value * 10**6
     else:
-        raise ValueError("Unsupported scale")
+        raise UnsupportedScaleError(scale)
     return f
 
 
@@ -97,6 +99,6 @@ def set_celsius(degrees: float, scale: str, precision: int):
     elif scale == "rankine":
         r = 9.0 / 5.0 * degrees + 482.67
     else:
-        raise ValueError("Unsupported scale")
+        raise UnsupportedScaleError(scale)
     return round(r, precision)
 
