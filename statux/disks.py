@@ -17,7 +17,7 @@ import errno
 from os import statvfs
 from os import listdir
 from statux._conversions import set_bytes
-from statux._errors import UnexpectedValueError, ValueNotFoundError, PartitionNotMountError
+from statux._errors import ValueNotFoundError, PartitionNotMountError, ex_handler
 
 _STAT = "/proc/"
 _DEV = "/dev/"
@@ -30,13 +30,15 @@ _PARTITIONS = "%spartitions" % _STAT
 _DISKSTATS = "%sdiskstats" % _STAT
 
 _last = None
-
+_mounts = None
+_bsize = None
 
 def block_devices() -> list:
     """Returns a list with block devices (HDD, SSD, pendrives, micro-sd, DVD, etc)"""
     return [block for block in listdir(_BLOCK_DEV)]
 
 
+@ex_handler(_PARTITIONS)
 def partitions() -> list:
     """Returns a list with partitions"""
     with open(_PARTITIONS, "r") as f:
@@ -68,16 +70,27 @@ def _check_block(block):
 
 def is_rotational(block_device: str) -> bool:
     """Returns True if the device is of rotational type, False otherwise"""
-    with open("%s%s%s%s" % (_BLOCK_DEV, _check_block(block_device), _QUEUE, "rotational"), "rb") as f:
-        return bool(int(f.read()))
+    fn = "%s%s%s%s" % (_BLOCK_DEV, _check_block(block_device), _QUEUE, "rotational")
+
+    @ex_handler(fn)
+    def fun():
+        with open(fn, "rb") as f:
+            return bool(int(f.read()))
+    return fun()
 
 
 def is_removable(block_device: str) -> bool:
     """Returns True is the device is removable, False otherwise"""
-    with open("%s%s%s" % (_BLOCK_DEV, _check_block(block_device), "/removable"), "rb") as f:
-        return bool(int(f.read()))
+    fn = "%s%s/%s" % (_BLOCK_DEV, _check_block(block_device), "removable")
+
+    @ex_handler(fn)
+    def fun():
+        with open(fn, "rb") as f:
+            return bool(int(f.read()))
+    return fun()
 
 
+@ex_handler(_MOUNTS)
 def mounts_info() -> dict:
     """Returns a dict with mounted partitions and namedtuple with mount point, filesystem and mount options"""
     from collections import namedtuple
@@ -86,8 +99,13 @@ def mounts_info() -> dict:
         res = {}
         for line in file.readlines():
             ls = line.split()
-            if ls[0].startswith("/"):
-                res[ls[0].replace("/dev/", "")] = data(ls[1].replace("\\040", " "), ls[2], " ".join(ls[3:]))
+            if ls[0].startswith("/dev"):
+                dev = ls[0][5:]
+                # Uncomment and indent 2 lines below to discard non-pure partitions (e.g. loop1)
+                # if dev in partitions():
+                res[dev] = data(ls[1].replace("\\040", " "), ls[2], " ".join(ls[3:]))
+        if not res:
+            raise ValueNotFoundError("mounted partitions info", _MOUNTS, errno.ENODATA)
         return res
 
 
@@ -101,19 +119,19 @@ def mounted_partitions() -> dict:
                 if line.startswith("/"):
                     res[prt[0]] = prt[1].replace("\\040", " ")
             return res
-    result = {}
     mounts = get_mounts()
-    for partition in partitions():
-        dev = "%s%s" % (_DEV, partition)
-        if dev in mounts.keys():
-            result[partition] = mounts[dev]
+    result = {partition: mounts[_DEV + partition] for partition in partitions() if _DEV + partition in mounts.keys()}
+    if not result:
+        raise ValueNotFoundError("partitions", _MOUNTS, errno.ENODATA)
     return result
 
 
-def _get_stat(partition):
-    mounts = mounted_partitions()
+def _get_stat(partition: str, cached=False):
+    global _mounts
+    if _mounts is None:
+        _mounts = mounted_partitions()
     try:
-        return statvfs(mounts[partition])
+        return statvfs(_mounts[partition])
     except KeyError:
         raise PartitionNotMountError(_check_partitions(partition)[0])
 
@@ -125,14 +143,16 @@ def _get_disks_stats():
             if dev in ptt:
                 with open("%s%s%s" % (_BLOCK_DEV, dev, _LB_SIZE if logical else _PB_SIZE), "rb") as fl:
                     return int(fl.read())
+    global _bsize
     res = {}
     with open(_DISKSTATS, "r") as f:
         stat = f.readlines()
         for line in stat:
             ln = line.split()
             partition = ln[2]
-            bsize = get_bs(partition, True)  # True: logical block size, False: Physical block size
-            res[str(partition)] = int(ln[5]) * bsize, int(ln[9]) * bsize
+            if _bsize is None:
+                _bsize = get_bs(partition, True)  # True: logical block size, False: Physical block size
+            res[str(partition)] = int(ln[5]) * _bsize, int(ln[9]) * _bsize
     return res
 
 
