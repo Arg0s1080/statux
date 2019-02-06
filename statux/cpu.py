@@ -109,7 +109,6 @@ def logical_cpus() -> int:
 def physical_cpus():
     """Return the number of physical processors"""
     # TODO: to get better
-    _CPUINFO = "/jfjjf"
     with open(_CPUINFO, "rb") as file:
         res = {}
         stat = file.readlines()
