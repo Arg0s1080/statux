@@ -11,7 +11,7 @@
 # For more information on this, and how to apply and follow theGNU GPL, see:
 # http://www.gnu.org/licenses
 #
-# (ɔ) Iván Rincón 2018
+# (ɔ) Iván Rincón 2018 - 2019
 
 import errno
 from os import statvfs
@@ -32,6 +32,7 @@ _DISKSTATS = "%sdiskstats" % _STAT
 _last = None
 _mounts = None
 _bsize = None
+
 
 def block_devices() -> list:
     """Returns a list with block devices (HDD, SSD, pendrives, micro-sd, DVD, etc)"""
@@ -126,9 +127,9 @@ def mounted_partitions() -> dict:
     return result
 
 
-def _get_stat(partition: str, cached=False):
+def _get_stat(partition: str, cached=True):
     global _mounts
-    if _mounts is None:
+    if _mounts is None or not cached:
         _mounts = mounted_partitions()
     try:
         return statvfs(_mounts[partition])
