@@ -15,6 +15,7 @@
 
 
 from statux._conversions import set_bytes
+from statux._errors import *
 
 _STAT_PATH = "/proc/meminfo"
 
@@ -32,6 +33,7 @@ def _get_val(*items) -> list:
         return values
 
 
+@ex_handler(_STAT_PATH)
 def total(scale="MiB", precision=2):
     """Returns total RAM memory size
 
@@ -43,6 +45,7 @@ def total(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemTotal")[0], scale_out=scale, precision=precision)
 
 
+@ex_handler(_STAT_PATH)
 def free(scale="MiB", precision=2):
     """Returns free RAM
 
@@ -54,6 +57,7 @@ def free(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemFree")[0], scale_out=scale, precision=precision)
 
 
+@ex_handler(_STAT_PATH)
 def free_percent(precision=2) -> float:
     """Returns free RAM percent
 
@@ -67,6 +71,7 @@ def free_percent(precision=2) -> float:
     return round(values[0] / values[1] * 100, precision)
 
 
+@ex_handler(_STAT_PATH)
 def available(scale="MiB", precision=2):
     """Returns available RAM
 
@@ -80,6 +85,7 @@ def available(scale="MiB", precision=2):
     return set_bytes(_get_val(b"MemAvailable")[0], scale_out=scale, precision=precision)
 
 
+@ex_handler(_STAT_PATH)
 def available_percent(precision=2) -> float:
     """Returns available RAM percent
 
@@ -93,6 +99,7 @@ def available_percent(precision=2) -> float:
     return round(values[0] / values[1] * 100, precision)
 
 
+@ex_handler(_STAT_PATH)
 def buff_cache(scale="MiB", precision=2):
     """Returns buffers, cached and slab memory
 
@@ -104,6 +111,7 @@ def buff_cache(scale="MiB", precision=2):
     return set_bytes(buff + cache + sre + sur, scale_out=scale, precision=precision)
 
 
+@ex_handler(_STAT_PATH)
 def used(scale="MiB", precision=2):
     """Returns used RAM memory
 
@@ -118,6 +126,7 @@ def used(scale="MiB", precision=2):
     return set_bytes(tot - (buff + cached + slab + free_), scale_out=scale, precision=precision)
 
 
+@ex_handler(_STAT_PATH)
 def used_percent(precision=2):
     """Returns used RAM percentage
 
