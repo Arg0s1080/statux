@@ -22,14 +22,19 @@ _MEMINFO = "/proc/meminfo"
 
 def _get_val(*items) -> list:
     with open(_MEMINFO, "rb") as file:
-        stat_ = file.readlines()
         values = []
-        for l in range(len(stat_)):
-            for i in range(len(items)):
-                if stat_[l].startswith(items[i]):
-                    values.insert(i, int(stat_[l].split()[-2]))
-            if len(values) == len(items):
+        indices = []
+        l_items = len(items)
+        for l in file:
+            for i, value in enumerate(items):
+                if l.startswith(value):
+                    values.append(int(l.split()[-2]))
+                    indices.append(i)
+            if len(values) == l_items:
                 break
+        if len(values) != l_items:
+            nf = [items[k].decode() for k in [j for j in list(range(l_items)) if j not in indices]]
+            raise ValueNotFoundError(" ".join(nf), _MEMINFO, 61)
         return values
 
 
