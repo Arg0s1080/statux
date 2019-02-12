@@ -39,11 +39,13 @@ def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
                                time. False by default.
     """
     from time import strftime, localtime
-    with open(_STAT, "rb") as f:
-        for line in f.readlines():
+    with open(_STAT, "rb") as file:
+        r = None
+        for line in file:
             if line.startswith(b"btime"):
                 r = int(line.split()[1])
-                return r if not str_format else strftime(time_format, localtime(r))
+                break
+        return r if not str_format else strftime(time_format, localtime(r))
 
 
 def uptime(str_format=False):
