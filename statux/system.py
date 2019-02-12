@@ -13,9 +13,6 @@
 #
 # (ɔ) Iván Rincón 2019
 
-from time import strftime, localtime
-from datetime import timedelta
-from platform import machine
 
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
@@ -41,6 +38,7 @@ def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
                                if is set to True returns a formatted string with the system boot
                                time. False by default.
     """
+    from time import strftime, localtime
     with open(_STAT, "rb") as f:
         for line in f.readlines():
             if line.startswith(b"btime"):
@@ -55,6 +53,7 @@ def uptime(str_format=False):
             :str_format (bool): If is set to True returns a formatted string, seconds otherwise.
                                 False by default
     """
+    from datetime import timedelta
     with open(_UPTIME, "rb") as f:
         sec = float(f.readline().split()[0])
         return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
@@ -86,6 +85,7 @@ def kernel_version() -> str:
 
 def architecture() -> str:
     """Returns the machine type, (e.g.: 'x86_64' or 'i386')"""
+    from platform import machine
     return machine()
 
 
