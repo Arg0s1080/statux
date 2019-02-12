@@ -11,18 +11,18 @@
 # For more information on this, and how to apply and follow theGNU GPL, see:
 # http://www.gnu.org/licenses
 #
-# (ɔ) Iván Rincón 2018
+# (ɔ) Iván Rincón 2019
 
 from time import strftime, localtime
 from datetime import timedelta
 from platform import machine
 
-_PARENT = "/proc/"
-_STAT = "%sstat" % _PARENT
-_UPTIME = "%suptime" % _PARENT
-_INIT = "%s1/comm" % _PARENT
-_INFO_KERNEL = "%ssys/kernel/" % _PARENT
-_SESSION_ID = "%sself/sessionid" % _PARENT
+_PROC_PTH = "/proc/"
+_STAT = "%sstat" % _PROC_PTH
+_UPTIME = "%suptime" % _PROC_PTH
+_INIT = "%s1/comm" % _PROC_PTH
+_INFO_KERNEL = "%ssys/kernel/" % _PROC_PTH
+_SESSION_ID = "%sself/sessionid" % _PROC_PTH
 _OS_RELEASE = "/etc/os-release"
 
 
