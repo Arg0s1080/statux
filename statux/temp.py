@@ -24,10 +24,7 @@ _HWMON = "hwmon"
 
 def _get_stat():
     res = {}
-    if exists(_PARENT):
-        parent_path = _PARENT
-    else:
-        parent_path = "/sys/class/hwmon/"  # in some AMD _PARENT doesn't exist
+    parent_path = _PARENT if exists(_PARENT) else "/sys/class/hwmon/"  # in some AMD _PARENT doesn't exist
     for hwmon in listdir(parent_path):
         for file in listdir(join(parent_path, hwmon)):
             if file.endswith("label"):
