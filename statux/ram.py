@@ -15,7 +15,7 @@
 
 
 from statux._conversions import set_bytes
-from statux._errors import *
+from statux._errors import ValueNotFoundError, ex_handler
 
 _MEMINFO = "/proc/meminfo"
 
