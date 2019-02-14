@@ -8,19 +8,23 @@
 # using a licensed work, under the same license. Copyright and license notices must be
 # preserved. Contributors provide an express grant of patent rights.
 #
-# For more information on this, and how to apply and follow theGNU GPL, see:
+# For more information on this, and how to apply and follow the GNU GPL, see:
 # http://www.gnu.org/licenses
 #
 # (ɔ) Iván Rincón 2019
 
+from statux._errors import ValueNotFoundError, ex_handler
 
+_OS_RELEASE = "/etc/os-release"
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
 _UPTIME = "%suptime" % _PROC_PTH
 _INIT = "%s1/comm" % _PROC_PTH
 _INFO_KERNEL = "%ssys/kernel/" % _PROC_PTH
+_HOSTNAME = "%shostname" % _INFO_KERNEL
+_RELEASE = "%sosrelease" % _INFO_KERNEL
+_VERSION = "%sversion" % _INFO_KERNEL
 _SESSION_ID = "%sself/sessionid" % _PROC_PTH
-_OS_RELEASE = "/etc/os-release"
 
 
 def _get_os_release():
@@ -30,6 +34,7 @@ def _get_os_release():
         return {line.split("=")[0]: rpl(line.split("=")[1]) for line in f.readlines()}
 
 
+@ex_handler(_STAT)
 def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
     """Returns the time at which the system booted
 
@@ -48,6 +53,7 @@ def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
         return r if not str_format else strftime(time_format, localtime(r))
 
 
+@ex_handler(_UPTIME)
 def uptime(str_format=False):
     """Returns the time elapsed since system boot time
 
@@ -61,27 +67,31 @@ def uptime(str_format=False):
         return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
 
 
+@ex_handler(_INIT)
 def init() -> str:
     """Returns init system name (e.g.: systemd, sysvinit, upstart, etc)"""
     with open(_INIT, "r") as f:
-        return f.read()[:-1]
+        return f.readline()[:-1]
 
 
+@ex_handler(_HOSTNAME)
 def hostname() -> str:
     """Returns hostname"""
-    with open("%shostname" % _INFO_KERNEL, "r") as f:
-        return f.read()[:-1]
+    with open(_HOSTNAME, "r") as f:
+        return f.readline()[:-1]
 
 
+@ex_handler(_RELEASE)
 def kernel_release() -> str:
     """Returns kernel release (e.g.: '#25-Ubuntu SMP Wed May 23 18:02:16 UTC 2018')"""
-    with open("%sosrelease" % _INFO_KERNEL, "r") as f:
+    with open(_RELEASE, "r") as f:
         return f.read()[:-1]
 
 
+@ex_handler(_VERSION)
 def kernel_version() -> str:
     """Returns kernel version (e.g.: '4.15.0-23-generic')"""
-    with open("%sversion" % _INFO_KERNEL, "r") as f:
+    with open(_VERSION, "r") as f:
         return f.read()[:-1]
 
 
@@ -91,6 +101,7 @@ def architecture() -> str:
     return machine()
 
 
+@ex_handler(_SESSION_ID)
 def session_id() -> int:
     """Returns current session id"""
     with open(_SESSION_ID, "rb") as f:
@@ -99,22 +110,34 @@ def session_id() -> int:
 
 def distro_name() -> str:
     """Returns distro short name"""
-    return _get_os_release()["NAME"]
+    try:
+        return _get_os_release()["NAME"]
+    except KeyError:
+        raise ValueNotFoundError("distro name", _OS_RELEASE, 61)
 
 
 def distro_full_name() -> str:
     """Returns full distro description"""
-    return _get_os_release()["PRETTY_NAME"]
+    try:
+        return _get_os_release()["PRETTY_NAME"]
+    except KeyError:
+        raise ValueNotFoundError("distro description", _OS_RELEASE, 61)
 
 
 def distro_version() -> str:
     """Return distro version"""
-    return _get_os_release()["VERSION"]
+    try:
+        return _get_os_release()["VERSION"]
+    except KeyError:
+        raise ValueNotFoundError("distro version", _OS_RELEASE, 61)
 
 
 def distro_url() -> str:
     """Returns distro home url"""
-    return _get_os_release()["HOME_URL"]
+    try:
+        return _get_os_release()["HOME_URL"]
+    except KeyError:
+        raise ValueNotFoundError("distro url", _OS_RELEASE, 61)
 
 
 def linux_distribution():
@@ -125,4 +148,9 @@ def linux_distribution():
 
     """
     info = _get_os_release()
-    return info["ID"], info["VERSION_ID"], info["VERSION_CODENAME"]
+    try:
+        return info["ID"], info["VERSION_ID"], info["VERSION_CODENAME"]
+    except KeyError as ex:
+        key = ex.args[0]
+        value = "distro id" if key == "ID" else "distro version" if key == "VERSION_ID" else "version codename"
+        raise ValueNotFoundError(value, _OS_RELEASE, 61)
