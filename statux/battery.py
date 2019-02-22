@@ -41,6 +41,7 @@ def _noner(fun):
 
 
 def _get_stat(file: str, supply: str) -> list:
+    # supply: can be "BAT0", "BAT1", "ACAD", "UPS"...
     supply_ = None
     try:
         # TODO: More than one supply support
