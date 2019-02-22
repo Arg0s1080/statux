@@ -71,6 +71,16 @@ class UnexpectedValueError(ValueError, StatuxError):
         return "%s%s" % (self.__class__.__name__, self.args)
 
 
+class TempNotFoundError(StatuxError):
+    def __init__(self, value, msg=""):
+        self.value = value
+        self.strerror = msg or ("%s value not found" % self.value)
+        self.args = (self.strerror, self.value)
+
+    def __repr__(self):
+        return "%s%s" % (self.__class__.__name__, self.args)
+
+
 class PlatformError(RuntimeError, StatuxError):
     def __init__(self, os):
         self.platform = os
