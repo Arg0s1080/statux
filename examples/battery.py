@@ -4,7 +4,7 @@
 # GNU General Public License v3.0
 # http://www.gnu.org/licenses
 #
-# (ɔ) Iván Rincón 2018
+# (ɔ) Iván Rincón 2019
 
 from os.path import pardir, realpath
 from sys import path

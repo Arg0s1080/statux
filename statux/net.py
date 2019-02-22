@@ -11,7 +11,7 @@
 # For more information on this, and how to apply and follow theGNU GPL, see:
 # http://www.gnu.org/licenses
 #
-# (ɔ) Iván Rincón 2018
+# (ɔ) Iván Rincón 2019
 
 import errno
 from statux._conversions import set_bytes
