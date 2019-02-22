@@ -49,12 +49,8 @@ def _get_stat(file: str, supply: str) -> list:
                 break  # First supply is chosen
         if supply_ is not None:
             with open(join(_PARENT, supply_, file), "r") as f:
-            # TODO: Delete lines below
-            #with open("/home/ivan/Escritorio/uevent_BAT0_Fedora_VBox_discharging.fake") as f:
-            #with open("/home/ivan/Escritorio/uevent_BAT1_Neon.fake") as f:
                 return f.readlines()
     except FileNotFoundError:
-        # TODO: Handle exception
         raise
 
 
@@ -113,7 +109,6 @@ def _get_upower():
 ####################
 
 
-# @_noner
 def battery() -> dict:
     """Returns a dict with manufacturer, model and serial number of the battery"""
     stat = _get_values()
@@ -124,7 +119,6 @@ def battery() -> dict:
     }
 
 
-# @_noner
 def status() -> str:
     """Returns the status battery ('Full', 'Charging' or 'Discharging')"""
     return _get_value("status")
@@ -135,13 +129,11 @@ def is_present() -> bool:
     return bool(_get_value("present"))
 
 
-# @_noner
 def voltage() -> int:
     """Return the battery voltage (mV)"""
     return round(_get_value("voltage_now") / 10**3)
 
 
-# @_noner
 def current() -> int:
     """Return the battery current (mA)"""
     current_ = _get_value("current_now")
@@ -152,7 +144,6 @@ def current() -> int:
     return round(current_ / 10**3)
 
 
-# @_noner
 def energy() -> int:
     """Returns the battery energy value (mWh)"""
     energy_ = _get_value("energy_now")
@@ -163,7 +154,6 @@ def energy() -> int:
     return round(energy_ / 10**3)
 
 
-# @_noner
 def power() -> int:
     """Return the battery power (mW)"""
     stat = _get_values()
@@ -174,7 +164,6 @@ def power() -> int:
     return round(voltage_ * current_ / 10 ** 9)
 
 
-# @_noner
 def charge() -> int:
     """Returns the current battery charge (mAh)"""
     charge_ = _get_value("charge_now")
@@ -185,43 +174,36 @@ def charge() -> int:
     return round(charge_ / 10**3)
 
 
-# @_noner
 def capacity() -> int:
     """Return the current percentage of the battery (%)"""
     return _get_value("capacity")
 
 
-# @_noner
 def capacity_level() -> str:
     """Return the current battery capacity level ('Full', 'Normal', 'Low' or 'Critical')"""
     return _get_value("capacity_level")
 
 
-# @_noner
 def low_level() -> str:
     """Returns the value set for low battery level (% or seconds)"""
     return _get_upower()["Low"]
 
 
-# @_noner
 def critical_level() -> str:
     """Returns the value set for critical battery (% or seconds)"""
     return _get_upower()["Critical"]
 
 
-# @_noner
 def action_level() -> str:
     """Returns the value of the critical power action level (% or seconds)"""
     return _get_upower()["Action"]
 
 
-# @_noner
 def critical_power_action() -> str:
     """Returns critical power action ('PowerOff', 'Hibernate' or 'HybridSleep')"""
     return _get_upower()["PowerAction"]
 
 
-# @_noner
 def remaining_time(format_time=False):
     """Returns remaining battery life
 
@@ -240,7 +222,6 @@ def remaining_time(format_time=False):
             else round(value * 3600))
 
 
-# @_noner
 def wear_level() -> float:
     """Returns the wear level of the battery (%)
 
@@ -255,7 +236,6 @@ def wear_level() -> float:
     return round(100 - (full / design * 100), 2)
 
 
-# @_noner
 def technology() -> str:
     """Returns chemistry of the battery"""
     return _get_value("technology")
@@ -289,8 +269,6 @@ def lid_state():
         return
 
 
-# @_noner
 def ac_adapter_online() -> bool:
     """Returns True if AC adapter is online, False otherwise"""
     return bool(_get_value("online", supply="ACAD"))
-
