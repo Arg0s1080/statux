@@ -17,22 +17,39 @@
 from os import listdir
 from os.path import join, exists
 from statux._conversions import set_celsius
+from statux._errors import TempNotFoundError, ValueNotFoundError
 
-_PARENT = "/sys/devices/platform/coretemp.0/hwmon/"
+_PTH1 = "/sys/devices/platform/coretemp.0/hwmon/"
+_PTH2 = "/sys/class/hwmon/"
+_PARENT = _PTH1 if exists(_PTH1) else _PTH2  # in some AMD _PTH1 doesn't exist
 _HWMON = "hwmon"
 
 
 def _get_stat():
+    # Look for temp#* files in hwmon folders and associate labels with their inputs.
+    # E.g. temp1_label.read() = "Package id 0" and temp1_input.read() = "4500"
+    #      temp2_label.read() = "Core 0"       and temp2_input.read() = "4100"
+    #      will return {"Core 0": 41000, 'Package id 0': 45000}
     res = {}
-    parent_path = _PARENT if exists(_PARENT) else "/sys/class/hwmon/"  # in some AMD _PARENT doesn't exist
-    for hwmon in listdir(parent_path):
-        for file in listdir(join(parent_path, hwmon)):
+    err = None
+    for hwmon in listdir(_PARENT):
+        for file in listdir(join(_PARENT, hwmon)):
             if file.endswith("label"):
-                path_l = join(parent_path, hwmon, file)
+                path_l = join(_PARENT, hwmon, file)
                 with open(path_l, "rb") as file_l:
-                    label = file_l.readline()[:-1]
-                    with open(path_l.replace("label", "input"), "rb") as file_t:
-                        res[label.decode()] = int(file_t.readline()[:-1])
+                    label = file_l.readline()[:-1].decode()
+                    path_i = path_l.replace("label", "input")
+                    try:
+                        with open(path_i, "rb") as file_i:
+                            res[label] = int(file_i.readline()[:-1])
+                    except ValueError:
+                        err = 42
+                    except FileNotFoundError:
+                        err = 2
+                    finally:
+                        if err is not None:
+                            raise ValueNotFoundError("%s value" % label, path_i, err)
+
     return res
 
 
@@ -44,7 +61,9 @@ def cores(scale="celsius", precision=2) -> list:
         :precision (int): Number of rounding decimals
     """
     stat = _get_stat()
-    return [set_celsius(stat[key], scale, precision) for key in sorted(stat) if key.startswith("Core")]
+    if len(stat) > 0:
+        return [set_celsius(stat[key], scale, precision) for key in sorted(stat) if key.startswith("Core")]
+    raise TempNotFoundError("cores", "cores temp values not found")
 
 
 def cpu(scale="celsius", precision=2) -> float:
@@ -58,6 +77,7 @@ def cpu(scale="celsius", precision=2) -> float:
     for key in stat:
         if " id" in key:
             return set_celsius(stat[key], scale, precision)
+    raise TempNotFoundError("package id")
 
 
 def max_val(scale="celsius", precision=2) -> float:
@@ -68,4 +88,6 @@ def max_val(scale="celsius", precision=2) -> float:
         :precision (int): Number of rounding decimals
     """
     stat = _get_stat()
-    return set_celsius(max(stat.values()), scale, precision)
+    if len(stat) > 0:
+        return set_celsius(max(stat.values()), scale, precision)
+    raise TempNotFoundError("max value", "no temp value found")
