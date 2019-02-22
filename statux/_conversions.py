@@ -101,4 +101,3 @@ def set_celsius(degrees: float, scale: str, precision: int):
     else:
         raise UnsupportedScaleError(scale)
     return round(r, precision)
-
