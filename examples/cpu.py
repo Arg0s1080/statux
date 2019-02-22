@@ -18,16 +18,16 @@ print_txt("Logical CPU's", logical_cpus())
 print_txt("Max Frequency", max_frequency(False, scale="ghz"), "GHz")
 
 print("\nCPU Load (interval > 0):")
-load = Load(initialize=True)
-stat = load.next_value(interval=1.0, per_core=True, precision=1)
-for cpu in range(len(stat)):
-    print("cpu%d: %.1f%%" % (cpu + 1, stat[cpu]))
+cpu_load = Load()
+stat = cpu_load.next_value(interval=1.0, per_core=True, precision=1)
+for core in range(len(stat)):
+    print("cpu%d: %.1f%%" % (core + 1, stat[core]))
 
 
 print("\nCPU Load (interval == 0):")
 count = 0
 while count <= 10:
-    print_txt("Current CPU Load", load.next_value(0.0, False), "%")
+    print_txt("Current CPU Load", cpu_load.next_value(0.0, False), "%")
     sleep(1)
     count += 1
 
@@ -36,8 +36,8 @@ freq = frequency()
 freq_percent = frequency_percent()
 
 while count > 0:
-    for cpu in range(logical_cpus()):
-        print("Frequency cpu%d: %.3f MHz (%.2f%%)" % (cpu+1, freq[cpu], freq_percent[cpu]))
+    for core in range(logical_cpus()):
+        print("Frequency cpu%d: %.3f MHz (%.2f%%)" % (core + 1, freq[core], freq_percent[core]))
     print("")
     sleep(1)
     count -= 1
