@@ -51,8 +51,8 @@ def _get_stat(file: str, supply: str) -> list:
         if supply_ is not None:
             with open(join(_PARENT, supply_, file), "r") as f:
                 return f.readlines()
-    except FileNotFoundError:
-        raise
+    except FileNotFoundError as ex:
+        raise ValueNotFoundError("values", ex.filename, 2)
 
 
 def _get_uevent(supply: str):
