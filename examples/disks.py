@@ -6,16 +6,17 @@
 #
 # (ɔ) Iván Rincón 2018
 
+from os.path import pardir, realpath
 from sys import path
-path.append(path[0].replace("examples", ""))
+path.append(realpath(pardir))
 
 from statux.disks import *
 from time import sleep
 from random import choice
 
-print("Block", "Rotational", "Removable")
+print("Block ", "Rotational", "Removable")
 for block in sorted(block_devices()):
-    print(block.center(5),  str(is_rotational(block)).center(10), str(is_removable(block)).center(9))
+    print(block.center(6),  str(is_rotational(block)).center(10), str(is_removable(block)).center(9))
 
 ptt_dict = mounted_partitions()
 print("\nPartition", "Mount point")

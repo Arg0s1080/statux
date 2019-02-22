@@ -6,8 +6,9 @@
 #
 # (ɔ) Iván Rincón 2018
 
+from os.path import pardir, realpath
 from sys import path
-path.append(path[0].replace("examples", ""))
+path.append(realpath(pardir))
 
 from statux.net import *
 from time import sleep
