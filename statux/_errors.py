@@ -96,7 +96,7 @@ class PartitionNotMountError(StatuxError):
     def __init__(self, partition):
         self.partition = partition
         self.strerror = "%s is not mount" % self.partition
-        self.args = partition
+        self.args = self.strerror, self.partition
         super(PartitionNotMountError, self).__init__(self.partition)
 
     def __repr__(self):
