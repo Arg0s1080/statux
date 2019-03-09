@@ -19,43 +19,61 @@
 # TODO: Handle exceptions
 
 from os import listdir
-from os.path import join, exists
-from statux._errors import *
+from os.path import join
+from statux._errors import ValueNotFoundError, errno, strerror
 
 
 _PARENT = "/sys/class/power_supply/"
 _UEVENT = "uevent"
 _UPOWER = "/etc/UPower/UPower.conf"
 _LID = "/proc/acpi/button/lid/"
+_PTH = None
 
 
-def _noner(fun):
+def ex_handler(fun):
     def wrapper(*args, **kwargs):
+        def get_name():
+            # Returns method name
+            return fun.__name__.replace("_", " ")
+        error = None
+        msg = None
         try:
             return fun(*args, **kwargs)
+        except FileNotFoundError:
+            error = errno.ENOENT
+            msg = strerror(error)
         except KeyError:
-            return
-        except TypeError:
-            return
+            error = errno.ENODATA
+            msg = strerror(error)
+        except TypeError as exc:
+            error = errno.ENOMSG
+            msg = "%s: %s" % (strerror(errno.ENOMSG), exc.args[0])
+        except ValueError as exc:
+            error = errno.ENOMSG
+            msg = "%s: %s" % (strerror(errno.ENOMSG), exc.args[0])
+        finally:
+            if error is not None:
+                raise ValueNotFoundError(get_name(), _PTH, err_no=error, msg=msg)
     return wrapper
 
 
 def _get_stat(file: str, supply: str) -> list:
     # supply: can be "BAT0", "BAT1", "ACAD", "UPS"...
+    global _PTH
     supply_ = None
-    try:
-        # TODO: More than one supply support
-        for supply_ in [folder for folder in listdir(_PARENT)]:  # for supply in supplies
-            if supply_.startswith(supply):
-                break  # First supply is chosen
-        if supply_ is not None:
-            with open(join(_PARENT, supply_, file), "r") as f:
-                return f.readlines()
-    except FileNotFoundError as ex:
-        raise ValueNotFoundError("values", ex.filename, 2)
+    _PTH = _PARENT
+    # TODO: More than one supply support
+    for supply_ in [folder for folder in listdir(_PARENT)]:  # for supply in supplies
+        if supply_.startswith(supply):
+            break  # First supply is chosen
+    _PTH = join(_PARENT, supply_, file)
+    if supply_ is not None:
+        with open(_PTH, "r") as f:
+            return f.readlines()
 
 
 def _get_uevent(supply: str):
+    # supply: can be "BAT0", "BAT1", "ACAD", "UPS"...
     file = _get_stat(_UEVENT, supply)
     if file is not None:
         for ln in file:
@@ -72,6 +90,7 @@ def _get_value(item: str, supply="BAT"):
     for key, value in _get_uevent(supply):
         if key == item:
             return value
+    raise KeyError
 
 
 def _get_upower():
@@ -79,29 +98,28 @@ def _get_upower():
         ud = "%" if percent_ else "s"
         m = line.replace(pattern, "").split("=")
         res[m[0]] = "%s%s" % (m[1][:-1], ud)
-
-    # TODO Get better
-    if exists(_UPOWER):
-        with open(_UPOWER, "r") as f:
-            file = f.readlines()
-            res = {}
-            percent = True
-            for ln in file:
-                if ln.startswith("#") or ln.startswith("\n"):
-                    continue
+    global _PTH
+    _PTH = _UPOWER
+    with open(_UPOWER, "r") as f:
+        file = f.readlines()
+        res = {}
+        percent = True
+        for ln in file:
+            if ln.startswith("#") or ln.startswith("\n"):
+                continue
+            else:
+                if ln.startswith("UsePercentageForPolicy"):
+                    val = ln.split("=")[1][:-1].lower()
+                    percent = False if val == "false" else True
+                elif ln.startswith("CriticalPowerAction"):
+                    res["PowerAction"] = ln.split("=")[1][:-1]
                 else:
-                    if ln.startswith("UsePercentageForPolicy"):
-                        val = ln.split("=")[1][:-1].lower()
-                        percent = False if val == "false" else True
-                    elif ln.startswith("CriticalPowerAction"):
-                        res["PowerAction"] = ln.split("=")[1][:-1]
+                    if percent:
+                        if ln.startswith("Percentage"):
+                            set_dict(ln, "Percentage", percent)
                     else:
-                        if percent:
-                            if ln.startswith("Percentage"):
-                                set_dict(ln, "Percentage", percent)
-                        else:
-                            if ln.startswith("Time"):
-                                set_dict(ln, "Time", percent)
+                        if ln.startswith("Time"):
+                            set_dict(ln, "Time", percent)
         return res
 
 
@@ -109,7 +127,7 @@ def _get_upower():
 # BATTERY METHODS:
 ####################
 
-
+@ex_handler
 def battery() -> dict:
     """Returns a dict with manufacturer, model and serial number of the battery"""
     stat = _get_values()
@@ -120,21 +138,25 @@ def battery() -> dict:
     }
 
 
+@ex_handler
 def status() -> str:
     """Returns the status battery ('Full', 'Charging' or 'Discharging')"""
     return _get_value("status")
 
 
+@ex_handler
 def is_present() -> bool:
     """Return True if the battery is present, False otherwise"""
-    return bool(_get_value("present"))
+    return bool(int(_get_value("present")))
 
 
+@ex_handler
 def voltage() -> int:
     """Return the battery voltage (mV)"""
     return round(_get_value("voltage_now") / 10**3)
 
 
+@ex_handler
 def current() -> int:
     """Return the battery current (mA)"""
     current_ = _get_value("current_now")
@@ -145,16 +167,19 @@ def current() -> int:
     return round(current_ / 10**3)
 
 
+@ex_handler
 def energy() -> int:
     """Returns the battery energy value (mWh)"""
-    energy_ = _get_value("energy_now")
-    if energy_ is None:  # energy value is not given...
+    try:
+        energy_ = _get_value("energy_now")
+        return round(energy_ / 10**3)
+    except KeyError:  # energy value is not given...
         stat = _get_values()
         voltage_, charge_ = stat["voltage_now"], stat["charge_now"]  # so let's try to get voltage and charge
-        return round(voltage_ * charge_ / 10**9)
-    return round(energy_ / 10**3)
+        return round(voltage_ * charge_ / 10 ** 9)
 
 
+@ex_handler
 def power() -> int:
     """Return the battery power (mW)"""
     stat = _get_values()
@@ -165,46 +190,55 @@ def power() -> int:
     return round(voltage_ * current_ / 10 ** 9)
 
 
+@ex_handler
 def charge() -> int:
     """Returns the current battery charge (mAh)"""
-    charge_ = _get_value("charge_now")
-    if charge_ is None:  # charge value is not given...
+    try:
+        charge_ = _get_value("charge_now")
+        return round(charge_ / 10**3)
+    except KeyError:  # charge value is not given...
         stat = _get_values()
         energy_, voltage_ = stat["energy_now"], stat["voltage_now"]
         return round(energy_ / voltage_ * 10**3)
-    return round(charge_ / 10**3)
 
 
+@ex_handler
 def capacity() -> int:
     """Return the current percentage of the battery (%)"""
     return _get_value("capacity")
 
 
+@ex_handler
 def capacity_level() -> str:
     """Return the current battery capacity level ('Full', 'Normal', 'Low' or 'Critical')"""
     return _get_value("capacity_level")
 
 
+@ex_handler
 def low_level() -> str:
     """Returns the value set for low battery level (% or seconds)"""
     return _get_upower()["Low"]
 
 
+@ex_handler
 def critical_level() -> str:
     """Returns the value set for critical battery (% or seconds)"""
     return _get_upower()["Critical"]
 
 
+@ex_handler
 def action_level() -> str:
     """Returns the value of the critical power action level (% or seconds)"""
     return _get_upower()["Action"]
 
 
+@ex_handler
 def critical_power_action() -> str:
     """Returns critical power action ('PowerOff', 'Hibernate' or 'HybridSleep')"""
     return _get_upower()["PowerAction"]
 
 
+@ex_handler
 def remaining_time(format_time=False):
     """Returns remaining battery life
 
@@ -223,6 +257,7 @@ def remaining_time(format_time=False):
             else round(value * 3600))
 
 
+@ex_handler
 def wear_level() -> float:
     """Returns the wear level of the battery (%)
 
@@ -237,18 +272,20 @@ def wear_level() -> float:
     return round(100 - (full / design * 100), 2)
 
 
+@ex_handler
 def technology() -> str:
     """Returns chemistry of the battery"""
     return _get_value("technology")
 
 
+@ex_handler
 def supply_type():
     """Returns type of supply ('Battery', 'Mains', 'UPS', etc)"""
     try:
         return _get_stat("type", supply="BAT")[0][:-1]
     except IndexError:
-        # TODO: Handle exception
-        return
+        raise ValueNotFoundError("supply type", _PTH, 61)
+
 
 ##############
 # MISCELLANY:
@@ -258,18 +295,25 @@ def supply_type():
 def lid_state():
     """Returns lid state ('Open' or 'Close')"""
     lid = None
+    error = None
     try:
         for folder in listdir(_LID):
             if folder.startswith("LID"):
                 lid = folder
+                break
         if lid is not None:
             with open(join(_LID, lid, "state"), "r") as f:
                 return f.readline().split()[1]
+        else:
+            error: errno.ENODATA
     except FileNotFoundError:
-        # TODO: Handle exception
-        return
+        error = errno.ENOENT
+    finally:
+        if error is not None:
+            raise ValueNotFoundError("lid state", _LID, error)
 
 
+@ex_handler
 def ac_adapter_online() -> bool:
     """Returns True if AC adapter is online, False otherwise"""
-    return bool(_get_value("online", supply="ACAD"))
+    return bool(int(_get_value("online", supply="ACAD")))
