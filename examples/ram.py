@@ -27,4 +27,4 @@ def mem(scale):
     print_txt("Used", used_percent(), "%")
 
 
-repeat(10, mem, scale="kib")
+repeat(10, mem, scale="auto")
