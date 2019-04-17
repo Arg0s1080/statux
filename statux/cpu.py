@@ -192,6 +192,7 @@ def frequency_percent(per_core=True, precision=2):
 
 @ex_handler(_STAT)
 def boot_time(str_format=False):
+    # TODO: To system
     """Returns the time at which the system booted
 
         :Params:
@@ -213,6 +214,7 @@ def boot_time(str_format=False):
 
 @ex_handler(_UPTIME)
 def uptime(str_format=False):
+    # TODO: To system
     """Returns the time elapsed since system boot time
 
         :Params:
@@ -223,3 +225,5 @@ def uptime(str_format=False):
     with open(_UPTIME, "rb") as f:
         sec = float(f.readline().split()[0])
         return str(timedelta(seconds=sec)).rstrip("0").rstrip(".").rstrip(":") if str_format else sec
+
+# TODO: is_64_bit(): Bring back to life. Why did I remove it??
