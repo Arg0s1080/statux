@@ -32,8 +32,10 @@ def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
             bytes_ = value * 10**9
         elif scale_in == "kib":
             bytes_ = value * 2**10
-        elif scale_in == "gib":
+        elif scale_in == "mib":
             bytes_ = value * 2**20
+        elif scale_in == "gib":
+            bytes_ = value * 2**30
         else:
             raise UnsupportedScaleError(scale_in)
         if auto:
