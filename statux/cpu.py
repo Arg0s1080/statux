@@ -190,40 +190,4 @@ def frequency_percent(per_core=True, precision=2):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-@ex_handler(_STAT)
-def boot_time(str_format=False):
-    # TODO: To system
-    """Returns the time at which the system booted
-
-        :Params:
-            str_format (bool): If is False returns seconds since the Unix epoch (January 1, 1970),
-                               if is set to True returns a formatted string with the system boot
-                               time. False by default.
-    """
-    def sformat(v):
-        return strftime('%Y-%m-%d %H:%M:%S', localtime(v))
-    from time import strftime, localtime, time
-    with open(_STAT, "rb") as f:
-        for line in f.readlines():
-            if line.startswith(b"btime"):
-                r = int(line.split()[1])
-                if r > time():
-                    raise UnexpectedValueError("value obtained is greater than time()", r, time())
-                return r if not str_format else sformat(r)
-
-
-@ex_handler(_UPTIME)
-def uptime(str_format=False):
-    # TODO: To system
-    """Returns the time elapsed since system boot time
-
-        :Params:
-            :str_format (bool): If is set to True returns a formatted string, seconds otherwise.
-                                False by default
-    """
-    from datetime import timedelta
-    with open(_UPTIME, "rb") as f:
-        sec = float(f.readline().split()[0])
-        return str(timedelta(seconds=sec)).rstrip("0").rstrip(".").rstrip(":") if str_format else sec
-
 # TODO: is_64_bit(): Bring back to life. Why did I remove it??
