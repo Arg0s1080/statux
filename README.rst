@@ -68,10 +68,11 @@ CPU
 +---------------------+----------------------------------+
 | frequency_percent() | Current CPU frequency percent    |
 +---------------------+----------------------------------+
-| is_64_bit()         | True if CPU is 64 bits           |
-|                     | TODO: bring back it              |
+| is_x86_64()         | True if CPU is AMD64 or Intel64  |
+|                     | i.e. 64 bit capable              |
 +---------------------+----------------------------------+
-
+| model_name()        | CPU model name                   |
++---------------------+----------------------------------+
 
 DISKS
 -----
