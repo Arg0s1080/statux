@@ -42,6 +42,26 @@ def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
             str_format (bool): If is False returns seconds since the Unix epoch (January 1, 1970),
                                if is set to True returns a formatted string with the system boot
                                time. False by default.
+            time_format (str): Time format using the C standard
+
+                               Commonly used format codes:
+                                %Y  Year with century as a decimal number.
+                                %m  Month as a decimal number [01,12].
+                                %d  Day of the month as a decimal number [01,31].
+                                %H  Hour (24-hour clock) as a decimal number [00,23].
+                                %M  Minute as a decimal number [00,59].
+                                %S  Second as a decimal number [00,61].
+                                %z  Time zone offset from UTC.
+                                %a  Locale's abbreviated weekday name.
+                                %A  Locale's full weekday name.
+                                %b  Locale's abbreviated month name.
+                                %B  Locale's full month name.
+                                %c  Locale's appropriate date and time representation.
+                                %I  Hour (12-hour clock) as a decimal number [01,12].
+                                %p  Locale's equivalent of either AM or PM.
+
+                                More info:
+                                https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
     """
     from time import strftime, localtime
     with open(_STAT, "rb") as file:
