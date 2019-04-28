@@ -24,7 +24,7 @@ _STAT = "%sstat" % _PROC_PTH
 _CPUINFO = "%scpuinfo" % _PROC_PTH
 _UPTIME = "%suptime" % _PROC_PTH
 _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
-_MAX_FREQUENCY = None
+_MAX_FREQUENCY = None  # MHz
 
 
 @ex_handler(_STAT, "CPU load")
@@ -155,23 +155,25 @@ def max_frequency(per_core=True, scale="mhz", precision=3):
     global _MAX_FREQUENCY
     r = []
     err_no = 0
-    try:
-        for policy in listdir(_FREQUENCY_POLICY):
-            if policy.startswith("policy"):
-                for file in listdir(join(_FREQUENCY_POLICY, policy)):
-                    if file == "cpuinfo_max_freq":
-                        with open(join(_FREQUENCY_POLICY, policy, file), "rb") as stat:
-                            r.insert(int(policy[-1]), int(stat.readline()) / 1000)
-                        break
-    except ValueError:
-        err_no = errno.ENODATA
-    err_no = errno.ENOENT if not len(r) else err_no
-    if err_no:
-        raise ValueNotFoundError("cpu max frequency", _FREQUENCY_POLICY, err_no)
     if _MAX_FREQUENCY is None:
-        _MAX_FREQUENCY = r
-    r = list(map(lambda x: round(set_mhz(x, scale), precision), r))
-    return r if per_core else round(sum(r) / float(len(r)), precision)
+        try:
+            for policy in listdir(_FREQUENCY_POLICY):
+                if policy.startswith("policy"):
+                    for file in listdir(join(_FREQUENCY_POLICY, policy)):
+                        if file == "cpuinfo_max_freq":
+                            with open(join(_FREQUENCY_POLICY, policy, file), "rb") as stat:
+                                r.insert(int(policy[-1]), int(stat.readline()) / 1000)
+                            break
+        except ValueError:
+            err_no = errno.ENODATA
+        err_no = errno.ENOENT if not len(r) else err_no
+        if err_no:
+            raise ValueNotFoundError("cpu max frequency", _FREQUENCY_POLICY, err_no)
+        _MAX_FREQUENCY = r  # MHz
+    else:
+        r = _MAX_FREQUENCY
+    rs = list(map(lambda x: round(set_mhz(x, scale), precision), r))
+    return rs if per_core else round(sum(rs) / float(len(rs)), precision)
 
 
 def frequency_percent(per_core=True, precision=2):
