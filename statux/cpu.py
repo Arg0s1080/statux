@@ -18,6 +18,7 @@ from os.path import join
 from statux._conversions import set_mhz
 from statux._errors import *
 from time import sleep
+from typing import Union, List
 
 
 _PROC_PTH = "/proc/"
@@ -62,7 +63,7 @@ class Load:
             return [list(map(int, stat[line].split()[1:])) for line in range(len(stat))
                     if stat[line].startswith(b"cpu")]
 
-    def next_value(self, interval=0.0, per_core=False, precision=2):
+    def next_value(self, interval=0.0, per_core=False, precision=2) -> Union[float, List[float]]:
         """ Returns CPU load percentage
 
         :Params:
@@ -116,7 +117,7 @@ def logical_cpus() -> int:
 
 
 @ex_handler(_CPUINFO)
-def physical_cpus():
+def physical_cpus() -> int:
     """Return the number of physical processors"""
     # TODO: to get better
     with open(_CPUINFO, "rb") as file:
@@ -151,7 +152,7 @@ def frequency(per_core=True, scale="mhz", precision=3) -> Union[float, List[floa
         return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-def max_frequency(per_core=True, scale="mhz", precision=3):
+def max_frequency(per_core=True, scale="mhz", precision=3) -> Union[float, List[float]]:
     """Returns cpu max frequency
 
         :Params:
@@ -186,7 +187,7 @@ def max_frequency(per_core=True, scale="mhz", precision=3):
     return rs if per_core else round(sum(rs) / float(len(rs)), precision)
 
 
-def frequency_percent(per_core=True, precision=2):
+def frequency_percent(per_core=True, precision=2) -> Union[float, List[float]]:
     """Returns current cpu frequency percent
 
         :Params:
@@ -207,7 +208,7 @@ def is_x86_64() -> bool:
     return _has_flag("lm")
 
 
-def model_name():
+def model_name() -> Union[str, List[str]]:
     """Returns CPU model name
 
     If there are more than one physical id with several models names, a list with its names
