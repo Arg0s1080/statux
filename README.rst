@@ -11,7 +11,7 @@ Battery
 +---------------------------+------------------------------------+
 | :code:`battery()`         | Manufacturer, model and s/n        |
 +---------------------------+------------------------------------+
-| `status()`                | Full, Charging or Discharging      |
+| ``status()``              | Full, Charging or Discharging      |
 +---------------------------+------------------------------------+
 | `is_present()`            | True if battery is present         |
 +---------------------------+------------------------------------+
@@ -68,7 +68,7 @@ CPU
 +-----------------------+----------------------------------+
 | `frequency_percent()` | Current CPU frequency percent    |
 +-----------------------+----------------------------------+
-| `is_x86_64()`         | True if CPU is AMD64 or Intel64  |
+| ``is_x86_64()``       | True if CPU is AMD64 or Intel64  |
 |                       | i.e. 64 bit capable              |
 +-----------------------+----------------------------------+
 | `model_name()`        | CPU model name                   |
