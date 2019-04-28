@@ -13,11 +13,12 @@
 #
 # (ɔ) Iván Rincón 2019
 
-from time import sleep
 from os import listdir
 from os.path import join
 from statux._conversions import set_mhz
 from statux._errors import *
+from time import sleep
+
 
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
@@ -25,6 +26,15 @@ _CPUINFO = "%scpuinfo" % _PROC_PTH
 _UPTIME = "%suptime" % _PROC_PTH
 _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
 _MAX_FREQUENCY = None  # MHz
+
+
+def _has_flag(flag: str) -> bool:
+    def flags():
+        with open(_CPUINFO, "r") as f:
+            for line in f:
+                if line.startswith("flags"):
+                    return line.split()[2:]
+    return flag in flags()
 
 
 @ex_handler(_STAT, "CPU load")
@@ -121,7 +131,7 @@ def physical_cpus():
         return sum(res.values())
 
 
-def frequency(per_core=True, scale="mhz", precision=3):
+def frequency(per_core=True, scale="mhz", precision=3) -> Union[float, List[float]]:
     """Returns current cpu frequency
 
     :Params:
@@ -192,4 +202,21 @@ def frequency_percent(per_core=True, precision=2):
     return r if per_core else round(sum(r) / float(len(r)), precision)
 
 
-# TODO: is_64_bit(): Bring back to life. Why did I remove it??
+def is_x86_64() -> bool:
+    """Returns True if CPU is AMD64 or Intel64 i.e. 64 bit capable"""
+    return _has_flag("lm")
+
+
+def model_name():
+    """Returns CPU model name
+
+    If there are more than one physical id with several models names, a list with its names
+    will be returned.
+    """
+    r = []
+    with open(_CPUINFO) as f:
+        for line in f:
+            if line.startswith("model name"):
+                r.append(line[line.find(": ")+2:-1])
+    result = list(set(r))  # Removing duplicated items
+    return r[0] if len(result) == 1 else result
