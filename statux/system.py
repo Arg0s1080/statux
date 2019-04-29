@@ -13,9 +13,9 @@
 #
 # (ɔ) Iván Rincón 2019
 
-from statux._errors import ValueNotFoundError, ex_handler
+from statux._errors import ValueNotFoundError, StatuxError, ex_handler
 
-_OS_RELEASE = "/etc/os-release"
+_OS_RELEASE = "/etc/os-release"  # /usr/lib/os-release
 _PROC_PTH = "/proc/"
 _STAT = "%sstat" % _PROC_PTH
 _UPTIME = "%suptime" % _PROC_PTH
@@ -99,6 +99,15 @@ def hostname() -> str:
     """Returns hostname"""
     with open(_HOSTNAME, "r") as f:
         return f.readline()[:-1]
+
+
+def user():
+    """Returns current user"""
+    from os import environ
+    try:
+        return environ["USER"]
+    except KeyError:
+        raise StatuxError("user name not found")
 
 
 @ex_handler(_RELEASE)
