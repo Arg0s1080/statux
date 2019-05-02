@@ -133,5 +133,10 @@ def ex_handler(filename, value=""):
     return raiser
 
 
-if not platform.startswith("linux"):
+if not platform.lower().startswith("linux"):
     raise PlatformError(platform)
+
+# from sys import version_info
+# if not version_info.major == 3:
+#     print("Python 3 is needed")
+#     exit(1)
