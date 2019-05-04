@@ -94,20 +94,25 @@ def is_removable(block_device: str) -> bool:
 
 def model(block_device: str) -> str:
     """Return model name name of the given block device (HDD, SSD, pendrives, micro-sd, DVD, etc)"""
-    # TODO: What to do with loop devices
-    # TODO: Test more devices
     pth = "%s%s/%s" % (_BLOCK_DEV, _check_block(block_device), "device")
     mod = "%s/%s" % (pth, "model")
 
     @ex_handler(mod)
     def fun():
-        with open(mod, "r") as mf:
-            vendor = "%s/%s" % (pth, "vendor")
-            lps = lambda x: x.readline().strip()
-            if exists(vendor):
-                with open(vendor, "r") as vf:
-                    return "%s %s" % (lps(vf), lps(mf))
-            return lps(mf)
+        try:
+            with open(mod, "r") as mf:
+                vendor = "%s/%s" % (pth, "vendor")
+                lps = lambda x: x.readline().strip()
+                if exists(vendor):
+                    with open(vendor, "r") as vf:
+                        return "%s %s" % (lps(vf), lps(mf))
+                return lps(mf)
+        except FileNotFoundError:
+            if block_device in block_devices():
+                # e.g. loop devices
+                # TODO: Get better because it's redundant -> 1st line: _check_block(block_device)
+                return
+            raise
     return fun()
 
 
