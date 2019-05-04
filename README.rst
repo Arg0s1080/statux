@@ -87,6 +87,8 @@ DISKS
 +------------------------------+---------------------------------------------+
 | ``is_removable()``           | If block device is removable                |
 +------------------------------+---------------------------------------------+
+| ``model()``                  | Model name of the given device (sda, hdb..) |
++------------------------------+---------------------------------------------+
 | ``mounts_info()``            | A dict with mounted partitions as key and a |
 |                              | namedtuple with mount point, filesystem and |
 |                              | mount options as value                      |
