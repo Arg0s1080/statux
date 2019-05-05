@@ -237,6 +237,8 @@ def used_space_percent(partition: str, precision=2) -> float:
 
 
 def _set_delta(*partitions_: str, interval=0.0, persecond=False):
+    # With one partition returns a tuple (read, written)
+    # with more than one returns a  dict {part1: (read, written), part2: (read, written), ...}
     from time import sleep, time
     global _last
     if _last is None or interval > 0.0:
@@ -249,7 +251,7 @@ def _set_delta(*partitions_: str, interval=0.0, persecond=False):
         elapsed = round(time() - _last[1], 3)  # milliseconds
     new_stat = _get_disks_stats()
     _last = new_stat, time()
-    f = {}
+    dic = {}
     for partition in partitions_:
         read_delta = new_stat[partition][0] - old_stat[partition][0]
         write_delta = new_stat[partition][1] - old_stat[partition][1]
@@ -258,8 +260,8 @@ def _set_delta(*partitions_: str, interval=0.0, persecond=False):
         if len(partitions_) < 2:
             return res
         else:
-            f[partition] = res
-    return f
+            dic[partition] = res
+    return dic
 
 
 def bytes_read(partition: str, interval=0.0, per_second=False, scale="KiB", precision=2):
