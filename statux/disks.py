@@ -116,6 +116,11 @@ def model(block_device: str) -> str:
     return fun()
 
 
+def _fix_escapes(string: str) -> str:
+    # E.g. "Data\\x20Partition -> "Data\x20Partition"
+    return string if "\\" not in string else string.encode().decode("unicode-escape").encode("latin1").decode()
+
+
 @ex_handler(_MOUNTS)
 def mounts_info() -> dict:
     """Returns a dict with mounted partitions and namedtuple with mount point, filesystem and mount options"""
@@ -129,7 +134,7 @@ def mounts_info() -> dict:
                 dev = ls[0][5:]
                 # Uncomment and indent 2 lines below to discard non-pure partitions (e.g. loop1)
                 # if dev in partitions():
-                res[dev] = data(ls[1].replace("\\040", " "), ls[2], " ".join(ls[3:]))
+                res[dev] = data(_fix_escapes(ls[1]), ls[2], " ".join(ls[3:]))
         if not res:
             raise ValueNotFoundError("mounted partitions info", _MOUNTS, errno.ENODATA)
         return res
@@ -143,7 +148,7 @@ def mounted_partitions() -> dict:
             for line in file.readlines():
                 prt = line.split()
                 if line.startswith("/"):
-                    res[prt[0]] = prt[1].replace("\\040", " ")
+                    res[prt[0]] = _fix_escapes(prt[1])
             return res
     mounts = get_mounts()
     result = {partition: mounts[_DEV + partition] for partition in partitions() if _DEV + partition in mounts.keys()}
