@@ -20,15 +20,15 @@ from os.path import exists
 from statux._conversions import set_bytes
 from statux._errors import ValueNotFoundError, PartitionNotMountError, ex_handler
 
-_STAT = "/proc/"
+_PROC = "/proc/"
 _DEV = "/dev/"
 _BLOCK_DEV = "/sys/block/"
 _QUEUE = "/queue/"
 _LB_SIZE = "%slogical_block_size" % _QUEUE
 _PB_SIZE = "%sphysical_block_size" % _QUEUE
-_MOUNTS = "%smounts" % _STAT
-_PARTITIONS = "%spartitions" % _STAT
-_DISKSTATS = "%sdiskstats" % _STAT
+_MOUNTS = "%smounts" % _PROC
+_PARTITIONS = "%spartitions" % _PROC
+_DISKSTATS = "%sdiskstats" % _PROC
 
 _last = None
 _mounts = None
