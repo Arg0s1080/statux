@@ -117,7 +117,11 @@ def model(block_device: str) -> str:
 
 
 def _fix_escapes(string: str) -> str:
-    # E.g. "Data\\x20Partition -> "Data\x20Partition"
+    # Sometimes Linux internally escapes path names. E.g. '/dev/disk/by-label/Data\x20Partition'. When
+    # statux captures these strings, Python adds a new backslash. E.g. "Data\x20Partition" becomes
+    # "Data\\x20Partition". To get this string as "Data Partition" is necessary to delete one backslash or
+    # to encode and decode the string several times. This is the only way I've found. Explanation in:
+    # https://es.stackoverflow.com/questions/261873/eliminar-una-barra-invertida-dentro-de-una-cadena-en-python
     return string if "\\" not in string else string.encode().decode("unicode-escape").encode("latin1").decode()
 
 
