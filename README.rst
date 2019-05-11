@@ -89,6 +89,10 @@ DISKS
 +------------------------------+---------------------------------------------+
 | ``model()``                  | Model name of the given device (sda, hdb..) |
 +------------------------------+---------------------------------------------+
+| ``disk_naming()``            | a namedtuple with persistent names of a     |
+|                              | disk or a partition (id, label, path, uuid  |
+|                              | partlabel and partuuid)                     |
++------------------------------+---------------------------------------------+
 | ``mounts_info()``            | A dict with mounted partitions as key and a |
 |                              | namedtuple with mount point, filesystem and |
 |                              | mount options as value                      |

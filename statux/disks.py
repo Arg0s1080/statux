@@ -14,14 +14,14 @@
 # (ɔ) Iván Rincón 2018, 2019
 
 import errno
-from os import statvfs
-from os import listdir
-from os.path import exists
+from os import listdir, readlink, statvfs
+from os.path import basename, exists
 from statux._conversions import set_bytes
 from statux._errors import ValueNotFoundError, PartitionNotMountError, ex_handler
 
 _PROC = "/proc/"
 _DEV = "/dev/"
+_DISK = "%sdisk/" % _DEV
 _BLOCK_DEV = "/sys/block/"
 _QUEUE = "/queue/"
 _LB_SIZE = "%slogical_block_size" % _QUEUE
