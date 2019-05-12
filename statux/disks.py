@@ -8,7 +8,7 @@
 # using a licensed work, under the same license. Copyright and license notices must be
 # preserved. Contributors provide an express grant of patent rights.
 #
-# For more information on this, and how to apply and follow theGNU GPL, see:
+# For more information on this, and how to apply and follow the GNU GPL, see:
 # http://www.gnu.org/licenses
 #
 # (ɔ) Iván Rincón 2018, 2019
@@ -42,15 +42,20 @@ def block_devices() -> list:
 
 
 @ex_handler(_PARTITIONS)
-def partitions() -> list:
-    """Returns a list with partitions"""
+def partitions(remove_disks=True) -> list:
+    """Returns a list with partitions
+
+    :Params:
+        :remove_disk (bool): If it's True removes block devices from the list
+
+    """
     with open(_PARTITIONS, "r") as f:
         stat = f.readlines()
         res = []
-        dsk = block_devices()
+        dsk = remove_disks and block_devices()
         for i in range(2, len(stat)):
             ptt = stat[i].split()[3]
-            if ptt not in dsk:
+            if not remove_disks or ptt not in dsk:
                 res.append(ptt)
     return res
 
@@ -127,7 +132,7 @@ def _fix_escapes(string: str) -> str:
 
 
 def _get_disks_data():
-    # todo: handle exceptions
+    # TODO: I don't like. GET BETTER!!!
     def fix_name(string):
         return string.lstrip("by-")
     total_items, keys, fields = [], [], []
@@ -163,9 +168,7 @@ def disk_naming(disk_or_partition: str):
         :disk_or_partition (str): Disk or partition name (e.g.: 'sda', 'nvme0n1', 'sdb1', etc)
 
     """
-    # TODO: Test with more devices (MBR and GPT)
-    # TODO: Complete errors handling
-    # TODO: Support for more than one value (e.g. id = [id1, id2, ...])
+    # TODO: I don't like. GET BETTER!!
     gdd = _get_disks_data()
     dd = gdd[0]
     if disk_or_partition not in dd.keys():
@@ -252,6 +255,7 @@ def total_size(partition: str, scale="GiB", precision=2):
         :scale     (str): Return scale (bytes, KiB, MiB, GiB, TiB, kB, MB, TB or auto)
                          GiB by default.
         :precision (int): Number of rounding decimals
+
     """
 
     stat = _get_stat(partition)
@@ -299,6 +303,7 @@ def used_space_percent(partition: str, precision=2) -> float:
 
 
 def _set_delta(*partitions_: str, interval=0.0, persecond=False):
+    # TODO: add type hint
     # With one partition returns a tuple (read, written)
     # with more than one returns a  dict {part1: (read, written), part2: (read, written), ...}
     from time import sleep, time
