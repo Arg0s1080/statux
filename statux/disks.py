@@ -169,7 +169,6 @@ def disk_naming(disk_or_partition: str):
 @ex_handler(_MOUNTS)
 def mounts_info() -> dict:
     """Returns a dict with mounted partitions and namedtuple with mount point, filesystem and mount options"""
-    from collections import namedtuple
     with open(_MOUNTS, "r") as file:
         data = namedtuple("mounts", "mount_point filesystem mount_options")
         res = {}
