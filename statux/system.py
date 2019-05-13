@@ -87,6 +87,8 @@ def uptime(str_format=False):
         return str(timedelta(seconds=sec)).rstrip("0").rstrip(".") if str_format else sec
 
 
+print(uptime(True))
+
 @ex_handler(_INIT)
 def init() -> str:
     """Returns init system name (e.g.: systemd, sysvinit, upstart, etc)"""

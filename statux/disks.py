@@ -131,54 +131,39 @@ def _fix_escapes(string: str) -> str:
     return string if "\\" not in string else string.encode().decode("unicode-escape").encode("latin1").decode()
 
 
-def _get_disks_data():
-    # TODO: I don't like. GET BETTER!!!
+def _get_disks_naming():
     def fix_name(string):
         return string.lstrip("by-")
-    total_items, keys, fields = [], [], []
-    for d in listdir(_DISK):
-        items = []
+    fields = [d for d in listdir(_DISK)]
+    result = {ptt: {fix_name(d): "" for d in fields} for ptt in partitions(False)}
+    for d in fields:
         pth = "%s%s/" % (_DISK, d)
-        for fn in listdir(pth):
-            lnk = "%s%s" % (pth, fn)
-            disk = basename(readlink(lnk))  # dispensable
-            items.append(lnk)
-            if disk not in keys:
-                keys.append(disk)
-        fields.append(fix_name(d))
-        total_items += items
-    disk_data = {key: [] for key in keys}  # disk_data dict skeleton.
-    for item in total_items:
-        disk = basename(readlink(item))
-        field = fix_name(item.split("/")[3])
-        value = basename(item)
-        disk_data[disk].append((field, value))
-    return disk_data, fields
+        for field in listdir(pth):
+            fn = "%s%s" % (pth, field)
+            field_name = fix_name(fn.split("/")[-2])
+            disk = basename(readlink(fn))
+            result[disk][field_name] = _fix_escapes(field)
+    return result
 
 
 def disk_naming(disk_or_partition: str):
     """Returns a namedtuple with persistent names of a disk or a partition
 
-    The namedtuple fields are persistent names, such as id, label, path, uuid and, on disks
-    with GPT partition tables, partlabel and partuuid if they exist.
+        The namedtuple fields are persistent names, such as id, label, path, uuid and, on disks
+        with GPT partition tables, partlabel and partuuid if they exist.
 
-    Note: Not applicable to LVM logical volumes.
+        Note: Not applicable to LVM logical volumes.
 
-    :Params:
-        :disk_or_partition (str): Disk or partition name (e.g.: 'sda', 'nvme0n1', 'sdb1', etc)
+        :Params:
+            :disk_or_partition (str): Disk or partition name (e.g.: 'sda', 'nvme0n1', 'sdb1', etc)
 
-    """
-    # TODO: I don't like. GET BETTER!!
-    gdd = _get_disks_data()
-    dd = gdd[0]
-    if disk_or_partition not in dd.keys():
+        """
+    try:
+        dic = _get_disks_naming()[disk_or_partition]
+    except KeyError:
         raise ValueNotFoundError(disk_or_partition, _DISK, errno.ENODEV)
-    disk_data, fields_names = dd[disk_or_partition], gdd[1]
-    data = namedtuple(disk_or_partition, fields_names)
-    fields = ["" for _ in fields_names]  # fields list skeleton
-    for item in disk_data:
-        fields[fields_names.index(item[0])] = _fix_escapes(item[1])
-    return data(*fields)
+    data = namedtuple(disk_or_partition, dic.keys())
+    return data(*dic.values())
 
 
 @ex_handler(_MOUNTS)
