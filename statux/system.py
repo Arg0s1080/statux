@@ -34,6 +34,14 @@ def _get_os_release():
         return {line.split("=")[0]: rpl(line.split("=")[1]) for line in f.readlines()}
 
 
+def _get_environ(var, name):
+    from os import environ
+    try:
+        return environ[var]
+    except KeyError:
+        raise StatuxError("%s not found" % name.replace("_", " "))
+
+
 @ex_handler(_STAT)
 def boot_time(str_format=False, time_format="%Y-%m-%d %H:%M:%S"):
     """Returns the time at which the system booted
@@ -103,11 +111,12 @@ def hostname() -> str:
 
 def user():
     """Returns current user"""
-    from os import environ
-    try:
-        return environ["USER"]
-    except KeyError:
-        raise StatuxError("user name not found")
+    return _get_environ("USER", user.__name__)
+
+
+def display_protocol():
+    """Returns current display protocol (normally 'x11' or 'wayland')"""
+    return _get_environ("XDG_SESSION_TYPE", display_protocol.__name__)
 
 
 @ex_handler(_RELEASE)
