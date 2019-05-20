@@ -45,8 +45,8 @@ def block_devices() -> list:
 def partitions(remove_disks=True) -> list:
     """Returns a list with partitions
 
-    :Params:
-        :remove_disk (bool): If it's True removes block devices from the list
+        :Params:
+            :remove_disk (bool): If it's True removes block devices from the list
 
     """
     with open(_PARTITIONS, "r") as f:
@@ -77,7 +77,12 @@ def _check_block(block):
 
 
 def is_rotational(block_device: str) -> bool:
-    """Returns True if the device is of rotational type, False otherwise"""
+    """Returns True if the device is of rotational type, False otherwise
+
+        :Params:
+            :block_device (str): Block device (HDD, SSD, pendrives, micro-sd, DVD, etc)
+
+    """
     fn = "%s%s%s%s" % (_BLOCK_DEV, _check_block(block_device), _QUEUE, "rotational")
 
     @ex_handler(fn)
@@ -88,7 +93,10 @@ def is_rotational(block_device: str) -> bool:
 
 
 def is_removable(block_device: str) -> bool:
-    """Returns True is the device is removable, False otherwise"""
+    """Returns True is the device is removable, False otherwise
+        :Params:
+            :block_device (str): Block device (HDD, SSD, pendrives, micro-sd, DVD, etc)
+    """
     fn = "%s%s/%s" % (_BLOCK_DEV, _check_block(block_device), "removable")
 
     @ex_handler(fn)
@@ -99,7 +107,10 @@ def is_removable(block_device: str) -> bool:
 
 
 def model(block_device: str) -> str:
-    """Return model name name of the given block device (HDD, SSD, pendrives, micro-sd, DVD, etc)"""
+    """Return model name name of the given block device (HDD, SSD, pendrives, micro-sd, DVD, etc)
+        :Params:
+            :block_device (str): Block device (HDD, SSD, pendrives, micro-sd, DVD, etc)
+    """
     pth = "%s%s/%s" % (_BLOCK_DEV, _check_block(block_device), "device")
     mod = "%s/%s" % (pth, "model")
 
@@ -146,7 +157,7 @@ def _get_disks_naming():
     return result
 
 
-def disk_naming(disk_or_partition: str):
+def disk_naming(disk_or_partition: str) -> namedtuple:
     """Returns a namedtuple with persistent names of a disk or a partition
 
         The namedtuple fields are persistent names, such as id, label, path, uuid and, on disks
@@ -167,21 +178,28 @@ def disk_naming(disk_or_partition: str):
 
 
 @ex_handler(_MOUNTS)
-def mounts_info() -> dict:
-    """Returns a dict with mounted partitions and namedtuple with mount point, filesystem and mount options"""
+def _get_mounts_info() -> dict:
+    # -> dict: keys = [mounted partitions], value = dict(mount_point, filesystem, mount_options)
     with open(_MOUNTS, "r") as file:
-        data = namedtuple("mounts", "mount_point filesystem mount_options")
         res = {}
         for line in file.readlines():
             ls = line.split()
             if ls[0].startswith("/dev"):
                 dev = ls[0][5:]
-                # Uncomment and indent 2 lines below to discard non-pure partitions (e.g. loop1)
-                # if dev in partitions():
-                res[dev] = data(_fix_escapes(ls[1]), ls[2], " ".join(ls[3:]))
-        if not res:
-            raise ValueNotFoundError("mounted partitions info", _MOUNTS, errno.ENODATA)
-        return res
+                yield dev, _fix_escapes(ls[2]), ls[1], " ".join(ls[3:])  # mount_point, filesystem, mount_options
+
+
+def _mount_info_dict() -> dict:
+    return {dev: {"filesystem": fs, "mount_point": mp, "mount_options": mo} for dev, fs, mp, mo in _get_mounts_info()}
+
+
+def mounts_info() -> dict:
+    """Returns a dict with mounted partitions and namedtuples with filesystems mount points and mount options"""
+    data = namedtuple("mounts", "filesystem mount_point mount_options")
+    info = {dev: data(fs, mp, mo) for dev, fs, mp,  mo in _get_mounts_info()}
+    if not info:
+        raise ValueNotFoundError("mounted partitions info", _MOUNTS, errno.ENODATA)
+    return info
 
 
 def mounted_partitions() -> dict:
