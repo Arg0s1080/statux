@@ -26,7 +26,8 @@ for key in sorted(ptt_dict, key=ptt_dict.__getitem__):
 partitions = sorted(ptt_dict.keys())
 
 for ptt in partitions:
-    print("\n%s" % ptt)
+    uuid = disk_naming(ptt).uuid
+    print("\n%s (UUID: %s)" % (ptt, uuid))
     print("Used :", used_space(ptt, "auto"))
     print("Free :", free_space(ptt, "auto"))
     print("Total:", total_size(ptt, "auto"))
@@ -42,11 +43,11 @@ while count <= 10:
     print("")
 
 ptt = choice(partitions)
-print("\n%s STAT.\nSleeping 3 seconds..." % ptt.upper())
+print("\n%s STAT.\nSleeping 3 seconds..." % ptt)
 print("Total KiB read: %.2f" % bytes_read(ptt, 3.0))
 
 
 ptt = choice(partitions)
-print("\n%s STAT.\nSleeping 5 seconds..." % ptt.upper())
+print("\n%s STAT.\nSleeping 5 seconds..." % ptt)
 print("Average bytes per second (read, write): %s" %
       str(bytes_read_write(ptt, interval=5, per_second=True, scale="bytes")))
