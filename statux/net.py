@@ -20,7 +20,7 @@ from statux._errors import ValueNotFoundError
 
 _STAT_PATH = "/proc/net/dev"
 _last = None
-_check_if = []
+_interfaces_checked = []
 
 
 def _get_stat():
@@ -34,11 +34,11 @@ def _get_stat():
 
 
 def _check_interface(interface: str, stat: dict):
-    if interface not in _check_if:
+    if interface not in _interfaces_checked:
         if interface not in stat.keys():
             raise ValueNotFoundError(interface, _STAT_PATH, errno.ENODEV)
         else:
-            _check_if.append(interface)
+            _interfaces_checked.append(interface)
     return interface
 
 
@@ -79,6 +79,9 @@ def get_interfaces() -> list:
         res.append(item)
     return res
 
+def get_address(interface: str) -> str:
+    # TODO: See /sys/class/net
+    pass
 
 def download_bytes(interface: str, scale="bytes", precision=2):
     """Returns total bytes downloaded in the given interface
