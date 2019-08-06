@@ -109,14 +109,32 @@ def hostname() -> str:
         return f.readline()[:-1]
 
 
-def user():
+def user() -> str:
     """Returns current user"""
     return _get_environ("USER", user.__name__)
 
 
-def display_protocol():
+def display_protocol() -> str:
+    # TODO: Test in other distros
     """Returns current display protocol (normally 'x11' or 'wayland')"""
     return _get_environ("XDG_SESSION_TYPE", display_protocol.__name__)
+
+
+def system_language() -> str:
+    # TODO: Test in other distros
+    """Returns system language and default coding"""
+    return _get_environ("LANG", "system language")
+
+
+def current_desktop() -> str:
+    # TODO: Test in other distros
+    """Return current desktop"""
+    return _get_environ("XDG_CURRENT_DESKTOP", current_desktop.__name__)
+
+
+def paths() -> list:
+    """Returns a list of directories in which your system looks for executable files"""
+    return _get_environ("PATH", "PATH environ variable").split(":")
 
 
 @ex_handler(_RELEASE)
