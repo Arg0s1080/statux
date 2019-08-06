@@ -20,6 +20,7 @@ from statux._errors import ValueNotFoundError
 
 _STAT_PATH = "/proc/net/dev"
 _last = None
+_check_if = []
 
 
 def _get_stat():
@@ -33,8 +34,11 @@ def _get_stat():
 
 
 def _check_interface(interface: str, stat: dict):
-    if interface not in stat.keys():
-        raise ValueNotFoundError(interface, _STAT_PATH, errno.ENODEV)
+    if interface not in _check_if:
+        if interface not in stat.keys():
+            raise ValueNotFoundError(interface, _STAT_PATH, errno.ENODEV)
+        else:
+            _check_if.append(interface)
     return interface
 
 
