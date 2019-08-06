@@ -12,11 +12,14 @@ path.append(realpath(pardir))
 
 from statux.system import *
 from examples._functions import print_txt
-
+print_txt("User", user())
+print_txt("Hostname", hostname())
 print_txt("Boot time", boot_time(str_format=True), "(%d seconds)" % boot_time())
 print_txt("Uptime", uptime(str_format=True), "(%d seconds)" % uptime())
 print_txt("Init", init())
-print_txt("Hostname", hostname())
+print_txt("Display protocol", display_protocol())
+print_txt("System language", system_language())
+print_txt("Current desktop", current_desktop())
 print_txt("Kernel release", kernel_release())
 print_txt("Kernel version", kernel_version())
 print_txt("Architecture", architecture())
