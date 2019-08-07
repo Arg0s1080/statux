@@ -18,13 +18,14 @@ from statux._conversions import set_bytes
 from statux._errors import ValueNotFoundError
 
 
-_STAT_PATH = "/proc/net/dev"
+_PROC_STAT = "/proc/net/dev"
+_SYS_NET_PTH = "/sys/class/net/"
 _last = None
 _interfaces_checked = []
 
 
 def _get_stat():
-    with open(_STAT_PATH, "r") as file:
+    with open(_PROC_STAT, "r") as file:
         stat = file.readlines()
         res = {}
         for i in range(2, len(stat)):
@@ -36,7 +37,7 @@ def _get_stat():
 def _check_interface(interface: str, stat: dict):
     if interface not in _interfaces_checked:
         if interface not in stat.keys():
-            raise ValueNotFoundError(interface, _STAT_PATH, errno.ENODEV)
+            raise ValueNotFoundError(interface, _PROC_STAT, errno.ENODEV)
         else:
             _interfaces_checked.append(interface)
     return interface
@@ -79,9 +80,18 @@ def get_interfaces() -> list:
         res.append(item)
     return res
 
+
 def get_address(interface: str) -> str:
-    # TODO: See /sys/class/net
-    pass
+    """Returns MAC address assigned to a network interface"""
+    with open("%s%s/%s" % (_SYS_NET_PTH, _check_interface(interface, _get_stat()), "address"), "r") as file:
+        return file.read()[:-1]
+
+
+def get_state(interface: str) -> str:
+    """Returns operational state of a network interface (up, down, unknown, dormant, etc)"""
+    with open("%s%s/%s" % (_SYS_NET_PTH, _check_interface(interface, _get_stat()), "operstate"), "r") as file:
+        return file.read()[:-1]
+
 
 def download_bytes(interface: str, scale="bytes", precision=2):
     """Returns total bytes downloaded in the given interface

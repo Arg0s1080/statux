@@ -124,6 +124,10 @@ NETWORK
 +----------------------+------------------------------------------+
 | ``get_interfaces()`` | All network interfaces                   |
 +----------------------+------------------------------------------+
+| ``get_address()``    | MAC address os a interface               |
++----------------------+------------------------------------------+
+| ``get_state()``      | Operational state of a interface         |
++----------------------+------------------------------------------+
 | ``download_bytes()`` | total bytes downloaded in a interface    |
 +----------------------+------------------------------------------+
 | ``upload_bytes()``   | total bytes uploaded in a interface      |
