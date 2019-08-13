@@ -15,8 +15,6 @@
 
 # NOTE: THIS CODE IS VALID FOR MOST LAPTOPS. IN CASE OF HAVING MORE THAN ONE SUPPLY,
 #       ONLY THE FIRST ONE WILL BE DETECTED
-# TODO: *1st* Find out how its work in desktop
-# TODO: Handle exceptions
 
 from os import listdir
 from os.path import join
@@ -267,7 +265,7 @@ def wear_level() -> float:
     stat = _get_values()
     try:  # Let's try to get charge values
         full, design = stat["charge_full"], stat["charge_full_design"]
-    except KeyError:
+    except KeyError:  # Charge values are not given, so let's try do it with energy values.
         full, design = stat["energy_full"], stat["energy_full_design"]
     return round(100 - (full / design * 100), 2)
 
