@@ -126,7 +126,7 @@ def _get_upower():
 ####################
 
 @ex_handler
-def battery() -> dict:
+def battery_info() -> dict:
     """Returns a dict with manufacturer, model and serial number of the battery"""
     stat = _get_values()
     return {

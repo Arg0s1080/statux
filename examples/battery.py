@@ -16,7 +16,7 @@ from examples._functions import print_txt
 
 if is_present():
 
-    for k, v in battery().items():
+    for k, v in battery_info().items():
         print_txt(k, v)
 
     print_txt("Supply type", supply_type())
