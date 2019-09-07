@@ -49,23 +49,24 @@ def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
                 scale_out = "KiB"
             else:
                 scale_out = "bytes"
-        if scale_out.lower() == "bytes" or scale_out.lower() == "b":
+        scale_out_lower = scale_out.lower()
+        if scale_out_lower == "bytes" or scale_out_lower == "b":
             r = int(bytes_)
-        elif scale_out.lower() == "kb":
+        elif scale_out_lower == "kb":
             r = bytes_ / 10**3
-        elif scale_out.lower() == "mb":
+        elif scale_out_lower == "mb":
             r = bytes_ / 10**6
-        elif scale_out.lower() == "gb":
+        elif scale_out_lower == "gb":
             r = bytes_ / 10**9
-        elif scale_out.lower() == "tb":
+        elif scale_out_lower == "tb":
             r = bytes_ / 10 ** 12
-        elif scale_out.lower() == "kib":
+        elif scale_out_lower == "kib":
             r = bytes_ / 2**10
-        elif scale_out.lower() == "mib":
+        elif scale_out_lower == "mib":
             r = bytes_ / 2**20
-        elif scale_out.lower() == "gib":
+        elif scale_out_lower == "gib":
             r = bytes_ / 2**30
-        elif scale_out.lower() == "tib":
+        elif scale_out_lower == "tib":
             r = bytes_ / 2**40
         else:
             raise UnsupportedScaleError(scale_out)
