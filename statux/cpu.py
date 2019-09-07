@@ -26,6 +26,8 @@ _STAT = "%sstat" % _PROC_PTH
 _CPUINFO = "%scpuinfo" % _PROC_PTH
 _UPTIME = "%suptime" % _PROC_PTH
 _FREQUENCY_POLICY = "/sys/devices/system/cpu/cpufreq/"
+
+# Cache:
 _MAX_FREQUENCY = None  # MHz
 
 

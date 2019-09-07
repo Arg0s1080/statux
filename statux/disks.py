@@ -31,6 +31,7 @@ _MOUNTS = "%smounts" % _PROC
 _PARTITIONS = "%spartitions" % _PROC
 _DISKSTATS = "%sdiskstats" % _PROC
 
+# Cache:
 _last = None
 _mounts = None
 _bsize = None

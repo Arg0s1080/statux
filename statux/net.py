@@ -20,6 +20,8 @@ from statux._errors import ValueNotFoundError
 
 _PROC_STAT = "/proc/net/dev"
 _SYS_NET_PTH = "/sys/class/net/"
+
+# Cache:
 _last = None
 _interfaces_checked = []
 
