@@ -18,6 +18,7 @@ from statux._errors import UnsupportedScaleError
 
 def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
     # Function returns: int if scale_out == 'bytes', str if scale_out == 'auto', float otherwise
+    # scale_in and scale out are insensitive
     f = []
     auto = True if scale_out == "auto" else False
     for value in values:
@@ -76,22 +77,23 @@ def set_bytes(*values, scale_in="KiB", scale_out="MiB", precision=2):
     return f[0] if len(f) < 2 else tuple(f)
 
 
-def set_mhz(value: float, scale="mhz"):
-    scale = scale.lower()
+def set_mhz(value: float, scale="mhz") -> float:
+    scale = scale.lower()  # Case insensitive
     if scale == "mhz":
         f = value
     elif scale == "ghz":
         f = value / 1000
-    elif scale .lower() == "khz":
+    elif scale == "khz":
         f = value * 1000
-    elif scale.lower() == "hz":
+    elif scale == "hz":
         f = value * 10**6
     else:
         raise UnsupportedScaleError(scale)
     return f
 
 
-def set_celsius(degrees: float, scale: str, precision: int):
+def set_celsius(degrees: float, scale: str, precision: int) -> float:
+    scale = scale.lower()  # Case insensitive
     degrees /= 1000
     if scale == "celsius":
         r = degrees
