@@ -277,7 +277,7 @@ def technology() -> str:
 
 
 @ex_handler
-def supply_type():
+def supply_type() -> str:
     """Returns type of supply ('Battery', 'Mains', 'UPS', etc)"""
     try:
         return _get_stat("type", supply="BAT")[0][:-1]
@@ -290,7 +290,7 @@ def supply_type():
 ##############
 
 
-def lid_state():
+def lid_state() -> str:
     """Returns lid state ('Open' or 'Close')"""
     lid = None
     error = None
