@@ -143,6 +143,14 @@ NETWORK
 
 RAM
 ---
+IMPORTANT
+=========
+August 2020:
+
+**Detected serious errors in RAM module using kernel 5.4. This may have happened in previous versions.
+Please don't use this module.**
+
+
 +-------------------------+--------------------------------+
 |        **Method**       |           **Returns**          |
 +-------------------------+--------------------------------+
