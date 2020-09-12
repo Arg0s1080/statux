@@ -25,16 +25,16 @@ def _get_val(*items) -> list:
         values = []
         indices = []
         l_items = len(items)
-        for l in file:
+        for line in file:
             for i, value in enumerate(items):
-                if l.startswith(value):
-                    values.append(int(l.split()[-2]))
+                if line.startswith(value):
+                    values.insert(i, int(line.split()[-2]))
                     indices.append(i)
             if len(values) == l_items:
                 break
         if len(values) != l_items:
-            nf = [items[k].decode() for k in [j for j in list(range(l_items)) if j not in indices]]
-            raise ValueNotFoundError(" ".join(nf), _MEMINFO, 61)
+            not_found = [items[k].decode() for k in [j for j in list(range(l_items)) if j not in indices]]
+            raise ValueNotFoundError(", ".join(not_found), _MEMINFO, 61)
         return values
 
 
@@ -47,7 +47,8 @@ def total(scale="MiB", precision=2):
             :precision (int): Number of rounding decimals
 
     """
-    return set_bytes(_get_val(b"MemTotal")[0], scale_out=scale, precision=precision)
+    total_ = _get_val(b"MemTotal")[0]
+    return set_bytes(total_, scale_out=scale, precision=precision)
 
 
 @ex_handler(_MEMINFO)
@@ -59,7 +60,8 @@ def free(scale="MiB", precision=2):
             :precision (int): Number of rounding decimals
 
     """
-    return set_bytes(_get_val(b"MemFree")[0], scale_out=scale, precision=precision)
+    free_ = _get_val(b"MemFree")[0]
+    return set_bytes(free_, scale_out=scale, precision=precision)
 
 
 @ex_handler(_MEMINFO)
@@ -72,8 +74,8 @@ def free_percent(precision=2) -> float:
             :precision (int): Number of rounding decimals
 
     """
-    values = _get_val(b"MemFree", b"MemTotal")
-    return round(values[0] / values[1] * 100, precision)
+    free_, total_ = _get_val(b"MemFree", b"MemTotal")
+    return round(free_ / total_ * 100, precision)
 
 
 @ex_handler(_MEMINFO)
@@ -87,7 +89,8 @@ def available(scale="MiB", precision=2):
             :precision (int): Number of rounding decimals
 
         """
-    return set_bytes(_get_val(b"MemAvailable")[0], scale_out=scale, precision=precision)
+    available_ = _get_val(b"MemAvailable")[0]
+    return set_bytes(available_, scale_out=scale, precision=precision)
 
 
 @ex_handler(_MEMINFO)
@@ -100,8 +103,8 @@ def available_percent(precision=2) -> float:
             :precision (int): Number of rounding decimals
 
         """
-    values = _get_val(b"MemAvailable", b"MemTotal")
-    return round(values[0] / values[1] * 100, precision)
+    available_, total_ = _get_val(b"MemAvailable", b"MemTotal")
+    return round(available_ / total_ * 100, precision)
 
 
 @ex_handler(_MEMINFO)
