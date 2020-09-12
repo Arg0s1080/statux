@@ -13,6 +13,6 @@
 #
 # (ɔ) Iván Rincón 2019
 
-__author__  = "Iván Rincón"
-__license__ = "GPL3"
-__version__ = "0.1.1"
+__author__  = "Ivan Rincon"
+__license__ = "GPLv3"
+__version__ = "0.1.2"
